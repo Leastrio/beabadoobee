@@ -25,7 +25,9 @@ defmodule Beabadoobee.Consumer do
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) do
     Fun.maybe_deathbed(msg)
-    Fun.maybe_meow(msg)
+    if msg.channel_id == @general_chat do
+      Fun.maybe_meow(msg)
+    end
   end
 
   def handle_event({:GUILD_MEMBER_ADD, {guild_id, %Nostrum.Struct.Guild.Member{} = member}, _ws_state}) do
