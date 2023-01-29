@@ -1,6 +1,6 @@
 defmodule Beabadoobee.Fun do
 
-  @meows ["meow", "MEOW", "MEEEEOOWWWWWW", "meow meow"]
+  @meows ["meow", "MEOW", "MEEEEOOWWWWWW", "meow meow", "moew"]
 
   def maybe_deathbed(%Nostrum.Struct.Message{} = msg) do
     if String.contains?(String.downcase(msg.content), ["deathbed", "death bed"]) do
