@@ -3,7 +3,8 @@ defmodule Beabadoobee.Invoker do
 
   use Beabadoobee.ApplicationCommandInvoker,
     commands: %{
-      "link" => Beabadoobee.Commands.Link
+      "link" => Beabadoobee.Commands.Link,
+      "profile" => Beabadoobee.Commands.Profile
     }
 
   def handle_interaction(interaction) do
@@ -12,8 +13,9 @@ defmodule Beabadoobee.Invoker do
         2 -> handle_application_command(interaction)
       end
     rescue
-      _ ->
+      e ->
         try do
+          Logger.error(inspect e)
           Beabadoobee.Utils.reply(interaction, content: "An error occurred")
         rescue
           _ -> :ok
