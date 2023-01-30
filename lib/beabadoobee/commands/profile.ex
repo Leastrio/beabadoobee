@@ -33,7 +33,6 @@ defmodule Beabadoobee.Commands.Profile do
       :error -> {:simple, content: "User does not have lastfm linked."}
       user -> {:simple, embeds: [generate_embed(user.body["user"])]}
     end
-
   end
 
   defp get_user(id) do
