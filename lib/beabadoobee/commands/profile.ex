@@ -24,8 +24,8 @@ defmodule Beabadoobee.Commands.Profile do
   @impl true
   def handle_application_command(interaction, options) do
     user = case options do
-      nil -> interaction.user.id
       [user] -> user.value
+      _ -> interaction.user.id
     end
     |> get_user()
 
@@ -49,5 +49,6 @@ defmodule Beabadoobee.Commands.Profile do
     |> put_url(user["url"])
     |> put_thumbnail(Enum.find(user["image"], fn image -> image["size"] == "large" end)["#text"])
     |> put_field("Info", "Username: **#{user["name"]}**\nRegistered: <t:#{user["registered"]["unixtime"]}:D> (<t:#{user["registered"]["unixtime"]}:R>)")
+    |> put_field("Play Counts", "")
   end
 end
