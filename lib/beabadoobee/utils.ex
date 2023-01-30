@@ -20,4 +20,10 @@ defmodule Beabadoobee.Utils do
       |> put_color(6960383)
       |> put_thumbnail("https://media.giphy.com/media/KkVPbGYUAZYdvcdv0A/giphy.gif")
   end
+
+  def reply(interaction, data) do
+    case interaction.type do
+      2 -> Nostrum.Api.create_interaction_response!(interaction, %{type: 4, data: Map.new(data)})
+    end
+  end
 end

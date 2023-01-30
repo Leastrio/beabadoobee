@@ -18,6 +18,9 @@ config :nostrum,
     guilds: Nostrum.Cache.GuildCache.NoOp,
   }
 
+config :tesla,
+  adapter: Tesla.Adapter.Hackney
+
 config :beabadoobee,
   ecto_repos: [Beabadoobee.Repo],
   general_chat: 0,

@@ -13,8 +13,9 @@ defmodule Beabadoobee.Consumer do
   end
 
   def handle_event({:READY, _ready, _ws_state}) do
-    Logger.info("Bot is ready")
+    Beabadoobee.Invoker.register_commands()
     Nostrum.Api.update_status(:online, "Ripples", 2)
+    Logger.info("Bot is ready")
   end
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) when msg.author.bot do
@@ -35,6 +36,10 @@ defmodule Beabadoobee.Consumer do
       Nostrum.Api.create_message(@general_chat, content: Utils.format_ping({:role, @welcome_role}) <> " " <> Utils.format_ping({:user, member.user.id}), embeds: [Utils.welcome_embed])
         |> Utils.maybe_log_error()
     end
+  end
+
+  def handle_event({:INTERACTION_CREATE, interaction, _ws_state}) do
+    Beabadoobee.Invoker.handle_interaction(interaction)
   end
 
   def handle_event(_event) do
