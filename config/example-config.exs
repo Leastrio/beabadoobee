@@ -26,6 +26,7 @@ config :beabadoobee,
   general_chat: 0,
   welcome_role: 0,
   guild_id: 0,
+  lastfm_key: "key"
   roles: %{
     level_5: 0,
     level_10: 0,
