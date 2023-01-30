@@ -12,7 +12,8 @@ defmodule Beabadoobee.Application do
     children =
       children ++
       [
-        Beabadoobee.State.Meow
+        Beabadoobee.State.Meow,
+        Beabadoobee.Repo
       ]
 
     opts = [strategy: :one_for_one, name: Beabadoobee.Supervisor]

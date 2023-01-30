@@ -1,5 +1,11 @@
 import Config
 
+config :beabadoobee, Beabadoobee.Repo,
+  database: "beabadoobee",
+  username: "user",
+  password: "pass",
+  hostname: "localhost"
+
 config :nostrum,
   token: "TOKEN",
   num_shards: :auto,
@@ -13,7 +19,8 @@ config :nostrum,
   }
 
 config :beabadoobee,
-  general_chat: ,
+  ecto_repos: [Beabadoobee.Repo],
+  general_chat: 0,
   welcome_role: 0,
   guild_id: 0,
   roles: %{
