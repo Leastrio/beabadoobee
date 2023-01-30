@@ -5,5 +5,6 @@ defmodule Beabadoobee.Database.Lastfm do
   schema "guilds" do
     field :guild_id, :integer, primary_key: true
     field :username, :string
+    field :updated, :utc_datetime
   end
 end

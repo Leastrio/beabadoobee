@@ -5,6 +5,7 @@ defmodule Beabadoobee.Repo.Migrations.CreateLastfm do
     create table(:lastfm, primary_key: false) do
       add :user_id, :bigint, primary_key: true
       add :username, :string
+      add :updated, :utc_datetime
     end
   end
 end
