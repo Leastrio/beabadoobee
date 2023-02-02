@@ -20,4 +20,10 @@ defmodule Beabadoobee.Fun do
         end
     end
   end
+
+  def maybe_meow(%Nostrum.Struct.Message{} = msg) do
+    if Regex.match?(~r/m*e*o*w*/i, msg.content) do
+      Beabadoobee.Database.Levels.upsert_meow(msg.guild_id, msg.author.id)
+    end
+  end
 end
