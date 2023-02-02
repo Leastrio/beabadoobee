@@ -1,23 +1,30 @@
 defmodule Beabadoobee.State.Meow do
-  use Agent
+  use GenServer
   require Logger
 
-  def start_link(_args) do
-    Agent.start_link(fn -> random_num() end, name: __MODULE__)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, [], name: __MODULE__)
   end
 
-  def value do
-    Agent.get(__MODULE__, & &1)
+  def init(_) do
+    :ets.new(:meow_counters, [:set, :named_table, :public, read_concurrency: true, write_concurrency: true])
+    {:ok, %{}}
   end
 
-  def decrement do
-    Agent.update(__MODULE__ , &(&1 - 1))
+  def value(id) do
+    case :ets.lookup(:meow_counters, id) do
+      [{_id, val}] -> val
+      [] -> nil
+    end
   end
 
-  def reset_counter do
+  def decrement(id) do
+    :ets.update_counter(:meow_counters, id, {1, -1})
+  end
+
+  def reset_counter(id) do
     num = random_num()
-    Agent.update(__MODULE__, fn _state -> num end)
-    Logger.info("Waiting for " <> to_string(num) <> " messages")
+    :ets.insert(:meow_counters, {id, num})
   end
 
   def random_num do

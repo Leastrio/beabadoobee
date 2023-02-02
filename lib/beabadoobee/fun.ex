@@ -1,4 +1,5 @@
 defmodule Beabadoobee.Fun do
+  alias Beabadoobee.State.Meow
 
   @meows ["meow", "MEOW", "MEEEEOOWWWWWW", "meow meow", "moew"]
 
@@ -8,11 +9,15 @@ defmodule Beabadoobee.Fun do
     end
   end
 
-  def maybe_meow(%Nostrum.Struct.Message{} = msg) do
-    Beabadoobee.State.Meow.decrement()
-    if Beabadoobee.State.Meow.value == 0 do
-      Beabadoobee.State.Meow.reset_counter()
-      Nostrum.Api.create_message(msg.channel_id, content: Enum.random(@meows))
+  def handle_meow(%Nostrum.Struct.Message{} = msg) do
+    case Meow.value(msg.guild_id) do
+      nil -> Meow.reset_counter(msg.guild_id)
+      num ->
+        Meow.decrement(msg.guild_id)
+        if num - 1 == 0 do
+          Meow.reset_counter(msg.guild_id)
+          Nostrum.Api.create_message(msg.channel_id, content: Enum.random(@meows))
+        end
     end
   end
 end
