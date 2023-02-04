@@ -32,6 +32,7 @@ defmodule Beabadoobee.State.Meow do
   end
 
   def fill_ets(nil), do: :ok
+  def fill_ets([]), do: :ok
   def fill_ets([head | tail]) do
     case tail do
       [] -> :ets.insert(:meow_counters, {head.guild_id, head.meow_channel_id, random_num()})
