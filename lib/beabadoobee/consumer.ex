@@ -28,8 +28,10 @@ defmodule Beabadoobee.Consumer do
     if msg.guild_id == @guild_id do
       Fun.maybe_deathbed(msg)
     end
-    Fun.handle_meow(msg)
-    Fun.maybe_meow(msg)
+    if Regex.match?(~r/m+ *e+ *o+ *w+ */i, msg.content) do
+      Fun.handle_meow(msg)
+    end
+    # Fun.maybe_meow(msg)
   end
 
   def handle_event({:GUILD_MEMBER_ADD, {guild_id, %Nostrum.Struct.Guild.Member{} = member}, _ws_state}) do

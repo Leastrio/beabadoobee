@@ -7,6 +7,16 @@ defmodule Beabadoobee.Utils do
   def format_ping({:role, id}), do: "<@&#{id}>"
   def format_ping({:user, id}), do: "<@#{id}>"
 
+  def delimit_num(num) do
+    num
+    |> to_charlist()
+    |> Enum.reverse()
+    |> Enum.chunk_every(3)
+    |> Enum.map( & Enum.reverse(&1))
+    |> Enum.reverse()
+    |> Enum.join(",")
+  end
+
   def welcome_embed() do
     %Nostrum.Struct.Embed{}
       |> put_title("˚୨୧⋆｡˚ ⋆welcome to the beacord! ⋆ ˚｡⋆୨୧˚")
