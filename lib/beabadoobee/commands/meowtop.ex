@@ -29,6 +29,7 @@ defmodule Beabadoobee.Commands.MeowTop do
     |> put_description(gen_desc("", 1, get_top(guild_id)))
   end
 
+  def gen_desc(_desc, _count, nil), do: "Noone has meowed yet..."
   def gen_desc(desc, count, [head | tail]) do
     case tail do
       [] -> desc <> "\n" <> gen_rank(count, head)
