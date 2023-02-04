@@ -4,7 +4,9 @@ defmodule Beabadoobee.Invoker do
   use Beabadoobee.ApplicationCommandInvoker,
     commands: %{
       "link" => Beabadoobee.Commands.Link,
-      "profile" => Beabadoobee.Commands.Profile
+      "profile" => Beabadoobee.Commands.Profile,
+      "meow" => Beabadoobee.Commands.Meow,
+      "meowtop" => Beabadoobee.Commands.MeowTop
     }
 
   def handle_interaction(interaction) do
