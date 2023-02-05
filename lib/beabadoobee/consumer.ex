@@ -52,10 +52,8 @@ defmodule Beabadoobee.Consumer do
         |> Enum.find(fn r -> r.emoji.name == "💧" end)
         |> Map.get(:count)
 
-        # Not used :(
-        if star_count >= 5 do
-          # Beabadoobee.Star.handle_star(message, star_count)
-          :noop
+        if star_count >= 3 do
+          Beabadoobee.Star.handle_star(message, star_count)
         end
       rescue
         e ->

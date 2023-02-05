@@ -54,9 +54,9 @@ defmodule Beabadoobee.Star do
       true -> stars / 8
     end
 
-    red = 255
-    green = trunc((194 * p) + (253 * (1 - p)))
-    blue = trunc((12 * p) + (247 * (1 - p)))
+    red = trunc((62 * p) + (212 * (1 - p)))
+    green = trunc((183 * p) + (239 * (1 - p)))
+    blue = 255
     (red <<< 16) + (green <<< 8) + blue
   end
 
@@ -66,8 +66,8 @@ defmodule Beabadoobee.Star do
 
   def star_emoji(stars) do
     cond do
-      10 > stars and stars >= 5 -> "💧"
-      15 > stars and stars >= 10 -> "💦"
+      5 > stars -> "💧"
+      10 > stars and stars >= 5 -> "💦"
       true -> "🌊"
     end
   end
