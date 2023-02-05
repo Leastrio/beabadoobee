@@ -6,6 +6,11 @@ defmodule Beabadoobee.Levels.LevelRoles do
   @level_25 Application.compile_env!(:beabadoobee, [:roles, :level_25])
   @level_30 Application.compile_env!(:beabadoobee, [:roles, :level_30])
   @level_35 Application.compile_env!(:beabadoobee, [:roles, :level_35])
+  @level_40 Application.compile_env!(:beabadoobee, [:roles, :level_40])
+  @level_45 Application.compile_env!(:beabadoobee, [:roles, :level_45])
+  @level_50 Application.compile_env!(:beabadoobee, [:roles, :level_50])
+  @level_55 Application.compile_env!(:beabadoobee, [:roles, :level_55])
+  @level_60 Application.compile_env!(:beabadoobee, [:roles, :level_60])
   @guild_id Application.compile_env!(:beabadoobee, :guild_id)
 
   def handle_message(message) do
@@ -24,6 +29,17 @@ defmodule Beabadoobee.Levels.LevelRoles do
         give_role(@level_30, message)
       String.contains?(message.content, "you r now level 35! <3 <3") ->
         give_role(@level_35, message)
+      String.contains?(message.content, "you r now level 40! <3 <3") ->
+        give_role(@level_35, message)
+      String.contains?(message.content, "you r now level 45! <3 <3") ->
+        give_role(@level_35, message)
+      String.contains?(message.content, "you r now level 50! <3 <3") ->
+        give_role(@level_35, message)
+      String.contains?(message.content, "you r now level 55! <3 <3") ->
+        give_role(@level_35, message)
+      String.contains?(message.content, "you r now level 60! <3 <3") ->
+        give_role(@level_35, message)
+
       true ->
         :ok
     end
