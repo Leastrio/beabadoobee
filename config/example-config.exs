@@ -12,7 +12,8 @@ config :nostrum,
   gateway_intents: [
     :message_content,
     :guild_messages,
-    :guild_members
+    :guild_members,
+    :guild_message_reactions
   ],
   caches: %{
     guilds: Nostrum.Cache.GuildCache.NoOp,
@@ -31,6 +32,7 @@ config :beabadoobee,
   welcome_role: 0,
   guild_id: 0,
   lastfm_key: "key",
+  starboard: 0,
   roles: %{
     level_5: 0,
     level_10: 0,

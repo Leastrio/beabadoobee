@@ -7,6 +7,7 @@ defmodule Beabadoobee.Consumer do
   @general_chat Application.compile_env!(:beabadoobee, :general_chat)
   @welcome_role Application.compile_env!(:beabadoobee, :welcome_role)
   @guild_id Application.compile_env!(:beabadoobee, :guild_id)
+  @starboard_channel Application.compile_env!(:beabadoobee, :starboard)
 
   def start_link do
     Consumer.start_link(__MODULE__)
@@ -43,6 +44,26 @@ defmodule Beabadoobee.Consumer do
 
   def handle_event({:INTERACTION_CREATE, interaction, _ws_state}) do
     Beabadoobee.Invoker.handle_interaction(interaction)
+  end
+
+  def handle_event({:MESSAGE_REACTION_ADD, %Nostrum.Struct.Event.MessageReactionAdd{} = reaction, _ws_state}) do
+    if reaction.guild_id == @guild_id and reaction.channel_id != @starboard_channel and reaction.emoji.name == "💧" do
+      try do
+        message = Nostrum.Api.get_channel_message!(reaction.channel_id, reaction.message_id)
+        star_count = message.reactions
+        |> Enum.find(fn r -> r.emoji.name == "💧" end)
+        |> Map.get(:count)
+
+        # Not used :(
+        if star_count >= 5 do
+          # Beabadoobee.Star.handle_star(message, star_count)
+          :noop
+        end
+      rescue
+        e ->
+          Logger.error(inspect e)
+      end
+    end
   end
 
   def handle_event(_event) do

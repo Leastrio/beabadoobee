@@ -6,6 +6,7 @@ defmodule Beabadoobee.Utils do
   def maybe_log_error(_), do: :ok
   def format_ping({:role, id}), do: "<@&#{id}>"
   def format_ping({:user, id}), do: "<@#{id}>"
+  def format_ping({:channel, id}), do: "<##{id}>"
 
   def delimit_num(num) do
     num
