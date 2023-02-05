@@ -15,7 +15,7 @@ defmodule Beabadoobee.Star do
           reactions -> Enum.find(reactions, fn r -> r.emoji.name == "💧" end).count
         end
         
-        if star_count >= 1 do
+        if star_count >= 3 do
           case type do
             :add -> Beabadoobee.Star.handle_star(message, star_count)
             :remove -> Beabadoobee.Star.handle_star_remove(message, star_count)
