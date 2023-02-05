@@ -30,15 +30,15 @@ defmodule Beabadoobee.Levels.LevelRoles do
       String.contains?(message.content, "you r now level 35! <3 <3") ->
         give_role(@level_35, message)
       String.contains?(message.content, "you r now level 40! <3 <3") ->
-        give_role(@level_35, message)
+        give_role(@level_40, message)
       String.contains?(message.content, "you r now level 45! <3 <3") ->
-        give_role(@level_35, message)
+        give_role(@level_45, message)
       String.contains?(message.content, "you r now level 50! <3 <3") ->
-        give_role(@level_35, message)
+        give_role(@level_50, message)
       String.contains?(message.content, "you r now level 55! <3 <3") ->
-        give_role(@level_35, message)
+        give_role(@level_55, message)
       String.contains?(message.content, "you r now level 60! <3 <3") ->
-        give_role(@level_35, message)
+        give_role(@level_60, message)
 
       true ->
         :ok
