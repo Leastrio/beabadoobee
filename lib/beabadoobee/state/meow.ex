@@ -18,7 +18,7 @@ defmodule Beabadoobee.State.Meow do
 
   def value(id) do
     case :ets.lookup(:meow_counters, id) do
-      [{_guild_id, _chan_id, val}] -> val
+      [{_guild_id, chan_id, val}] -> {chan_id, val}
       [] -> nil
     end
   end
