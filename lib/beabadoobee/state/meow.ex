@@ -24,7 +24,7 @@ defmodule Beabadoobee.State.Meow do
   end
 
   def decrement(id) do
-    :ets.update_counter(:meow_counters, id, {2, -1})
+    :ets.update_counter(:meow_counters, id, {3, -1})
   end
 
   def reset_counter(guild_id, channel_id) do
