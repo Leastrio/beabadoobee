@@ -18,6 +18,10 @@ config :nostrum,
     guilds: Nostrum.Cache.GuildCache.NoOp,
   }
 
+config :logger,
+  level: :info,
+  metadata: [:shard, :guild, :channel]
+
 config :tesla,
   adapter: Tesla.Adapter.Hackney
 
