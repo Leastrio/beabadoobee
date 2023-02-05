@@ -45,7 +45,7 @@ defmodule Beabadoobee.Consumer do
   end
 
   def handle_event({:MESSAGE_REACTION_ADD, %Nostrum.Struct.Event.MessageReactionAdd{} = reaction, _ws_state}) do
-    if reaction.guild_id == @guild_id and reaction.channel_id != @starboard_channel and reaction.emoji.name == "💧" do
+    if reaction.guild_id == 1055344742956806194 and reaction.channel_id != @starboard_channel and reaction.emoji.name == "💧" do
       try do
         message = Nostrum.Api.get_channel_message!(reaction.channel_id, reaction.message_id)
         star_count = message.reactions
