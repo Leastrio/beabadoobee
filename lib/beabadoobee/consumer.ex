@@ -26,13 +26,11 @@ defmodule Beabadoobee.Consumer do
   end
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) do
-    if msg.guild_id == @guild_id do
-      Fun.maybe_deathbed(msg)
-    end
     if Regex.match?(~r/m+ *e+ *o+ *w+ */i, msg.content) do
       Fun.handle_meow(msg)
     end
     Fun.maybe_meow(msg)
+    Fun.maybe_deathbed(msg)
   end
 
   def handle_event({:GUILD_MEMBER_ADD, {guild_id, %Nostrum.Struct.Guild.Member{} = member}, _ws_state}) do
