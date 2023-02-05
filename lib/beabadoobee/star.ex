@@ -1,17 +1,43 @@
 defmodule Beabadoobee.Star do
   import Nostrum.Struct.Embed
   import Bitwise
+  require Logger
 
   @starboard_channel Application.compile_env!(:beabadoobee, :starboard)
-  @guild_id Application.compile_env!(:beabadoobee, :guild_id)
+  @pluto_id Application.compile_env!(:beabadoobee, :pluto)
 
-  def handle_star(msg, stars) do
-    in_queue(msg, stars)
+  def handle_reaction_event({type, reaction}) do
+    if reaction.guild_id == @pluto_id and reaction.channel_id != @starboard_channel and reaction.emoji.name == "💧" do
+      try do
+        message = Nostrum.Api.get_channel_message!(reaction.channel_id, reaction.message_id)
+        star_count = case message.reactions do
+          nil -> 0
+          reactions -> Enum.find(reactions, fn r -> r.emoji.name == "💧" end).count
+        end
+        
+        if star_count >= 1 do
+          case type do
+            :add -> Beabadoobee.Star.handle_star(message, star_count)
+            :remove -> Beabadoobee.Star.handle_star_remove(message, star_count)
+          end
+        end
+      rescue
+        e ->
+          Logger.error(inspect e)
+      end
+    end
   end
 
-  def in_queue(msg, stars) do
+  def handle_star(msg, stars) do
     case Beabadoobee.Database.Stars.get_star_msg(msg.id) do
       nil -> send_new_star(msg, stars)
+      star_msg -> edit_star(msg, star_msg.starboard_msg_id, stars)
+    end
+  end
+
+  def handle_star_remove(msg, stars) do
+    case Beabadoobee.Database.Stars.get_star_msg(msg.id) do
+      nil -> :ok
       star_msg -> edit_star(msg, star_msg.starboard_msg_id, stars)
     end
   end
@@ -61,7 +87,7 @@ defmodule Beabadoobee.Star do
   end
 
   def jump_url(channel_id, msg_id) do
-    "[Jump!](https://discord.com/channels/#{@guild_id}/#{channel_id}/#{msg_id})"
+    "[Jump!](https://discord.com/channels/1055344742956806194/#{channel_id}/#{msg_id})"
   end
 
   def star_emoji(stars) do

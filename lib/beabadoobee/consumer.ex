@@ -45,21 +45,11 @@ defmodule Beabadoobee.Consumer do
   end
 
   def handle_event({:MESSAGE_REACTION_ADD, %Nostrum.Struct.Event.MessageReactionAdd{} = reaction, _ws_state}) do
-    if reaction.guild_id == 1055344742956806194 and reaction.channel_id != @starboard_channel and reaction.emoji.name == "💧" do
-      try do
-        message = Nostrum.Api.get_channel_message!(reaction.channel_id, reaction.message_id)
-        star_count = message.reactions
-        |> Enum.find(fn r -> r.emoji.name == "💧" end)
-        |> Map.get(:count)
+    Beabadoobee.Star.handle_reaction_event({:add, reaction})
+  end
 
-        if star_count >= 3 do
-          Beabadoobee.Star.handle_star(message, star_count)
-        end
-      rescue
-        e ->
-          Logger.error(inspect e)
-      end
-    end
+  def handle_event({:MESSAGE_REACTION_REMOVE, %Nostrum.Struct.Event.MessageReactionRemove{} = reaction, _ws_state}) do
+    Beabadoobee.Star.handle_reaction_event({:remove, reaction})
   end
 
   def handle_event(_event) do
