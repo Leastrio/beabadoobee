@@ -2,9 +2,9 @@ import Config
 
 config :beabadoobee, Beabadoobee.Repo,
   database: "beabadoobee",
-  username: "user",
-  password: "pass",
-  hostname: "localhost"
+  username: "postgres",
+  password: "password",
+  hostname: "database"
 
 config :nostrum,
   token: "TOKEN",

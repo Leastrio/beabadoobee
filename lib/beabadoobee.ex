@@ -1,18 +1,14 @@
 defmodule Beabadoobee do
-  @moduledoc """
-  Documentation for `Beabadoobee`.
-  """
+  @app :beabadoobee
 
-  @doc """
-  Hello world.
+  def migrate do
+    for repo <- repos() do
+      {:ok, _, _} = Ecto.Migrator.with_repo(repo, &Ecto.Migrator.run(&1, :up, all: true))
+    end
+  end
 
-  ## Examples
-
-      iex> Beabadoobee.hello()
-      :world
-
-  """
-  def hello do
-    :world
+  defp repos do
+    Application.load(@app)
+    Application.fetch_env!(@app, :ecto_repos)
   end
 end
