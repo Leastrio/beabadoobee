@@ -26,3 +26,5 @@ beabadoobee-*.tar
 /tmp/
 
 config.exs
+
+node_modules

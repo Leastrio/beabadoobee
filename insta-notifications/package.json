@@ -1,0 +1,22 @@
+{
+  "name": "insta-notifications",
+  "version": "1.0.0",
+  "description": "instagram notifications for beabadoobot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node ."
+  },
+  "author": "Leastrio",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^1.4.0",
+    "@discordjs/rest": "^1.5.0",
+    "big-integer": "^1.6.51",
+    "discord-api-types": "^0.37.31",
+    "instagram_mqtt": "^1.2.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  }
+}

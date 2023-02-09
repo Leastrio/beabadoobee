@@ -14,6 +14,13 @@ services:
       POSTGRES_DB: beabadoobee
     volumes:
       - db-data:/var/lib/postgresql/data
+  insta-alerts:
+    build: insta-notifications/.
+    environment:
+      USERNAME: user
+      PASSWORD: pass
+      CHANNEL_ID: id
+      TOKEN: token
 
 volumes:
   db-data: {}
