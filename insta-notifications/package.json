@@ -14,9 +14,7 @@
     "@discordjs/rest": "^1.5.0",
     "big-integer": "^1.6.51",
     "discord-api-types": "^0.37.31",
-    "instagram_mqtt": "^1.2.2"
-  },
-  "devDependencies": {
+    "instagram_mqtt": "^1.2.2",
     "typescript": "^4.9.5"
   }
 }
