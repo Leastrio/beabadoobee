@@ -46,7 +46,7 @@ defmodule Beabadoobee.Star do
       content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}",
       embeds: [gen_embed(msg, stars, guild.guild_id)]
       )
-    Beabadoobee.Database.Stars.insert_star(msg.id, star_msg.id)
+    Beabadoobee.Database.Stars.insert_star(msg.id, star_msg.id, guild.guild_id, msg.channel_id)
   end
 
   def edit_star(msg, star_id, stars, guild) do

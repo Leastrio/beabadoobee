@@ -16,9 +16,11 @@ defmodule Beabadoobee.Database.Stars do
     Beabadoobee.Repo.one(query)
   end
 
-  def insert_star(msg_id, star_id) do
+  def insert_star(msg_id, star_id, guild_id, channel_id) do
     Beabadoobee.Repo.insert!(%__MODULE__{
       msg_id: msg_id,
+      guild_id: guild_id,
+      channel_id: channel_id,
       starboard_msg_id: star_id
     })
   end
