@@ -12,7 +12,7 @@ const writeFileAsync = promisify(writeFile);
 const readFileAsync = promisify(readFile);
 const existsAsync = promisify(exists);
 
-const IG_USERNAME: any = process.env.USERNAME, IG_PASSWORD: any = process.env.PASSWORD, CHANNEL_ID: any = process.env.CHANNEL_ID, TOKEN: any = process.env.TOKEN;
+const IG_USERNAME: any = process.env.USERNAME, IG_PASSWORD: any = process.env.PASSWORD, CHANNEL_ID: any = process.env.CHANNEL_ID, TOKEN: any = process.env.TOKEN, ROLE_ID: any = process.env.ROLE_ID;
 const rest = new REST({ version: '10' }).setToken(TOKEN);
 const igClient = new IgApiClient();
 
@@ -85,7 +85,7 @@ async function do_reel(data: any, ig: any) {
     let stories = await ig.feed.userStory(427170733).items();
 
     await post_alert({
-        content: `New Story!\n${stories[stories.length - 1]["video_versions"][0]["url"]}`,
+        content: `<@&${ROLE_ID}> New Story!\n${stories[stories.length - 1]["video_versions"][0]["url"]}`,
         components: [{
             type: 1,
             components: [{
@@ -106,7 +106,7 @@ async function do_post(data: any) {
         .toJSON()
     
     await post_alert({
-        content: "New Post!",
+        content: `<@&${ROLE_ID}> New Post!`,
         embeds: [embed],
         components: [{
             type: 1,

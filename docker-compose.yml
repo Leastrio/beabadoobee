@@ -21,6 +21,7 @@ services:
       PASSWORD: pass
       CHANNEL_ID: id
       TOKEN: token
+      ROLE_ID: id
 
 volumes:
   db-data: {}
