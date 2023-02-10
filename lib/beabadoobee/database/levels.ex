@@ -1,8 +1,8 @@
-defmodule Beabadoobee.Database.Levels do
+defmodule Beabadoobee.Database.Member do
   use Ecto.Schema
 
   @primary_key false
-  schema "levels" do
+  schema "members" do
     field :guild_id, :integer, primary_key: true
     field :user_id, :integer, primary_key: true
     field :xp, :integer

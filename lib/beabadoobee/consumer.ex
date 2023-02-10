@@ -7,7 +7,6 @@ defmodule Beabadoobee.Consumer do
   @general_chat Application.compile_env!(:beabadoobee, :general_chat)
   @welcome_role Application.compile_env!(:beabadoobee, :welcome_role)
   @guild_id Application.compile_env!(:beabadoobee, :guild_id)
-  @starboard_channel Application.compile_env!(:beabadoobee, :starboard)
 
   def start_link do
     Consumer.start_link(__MODULE__)
@@ -26,7 +25,7 @@ defmodule Beabadoobee.Consumer do
   end
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) do
-    if Regex.match?(~r/m+ *e+ *o+ *w+ */i, msg.content) do
+    if Regex.match?(~r/m+ *e+ *o+ *w+/i, msg.content) do
       Fun.handle_meow(msg)
     end
     Fun.maybe_meow(msg)

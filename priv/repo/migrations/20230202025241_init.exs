@@ -12,7 +12,7 @@ defmodule Beabadoobee.Repo.Migrations.Init do
       add :username, :string
     end
 
-    create table(:levels, primary_key: false) do
+    create table(:members, primary_key: false) do
       add :guild_id, :bigint, primary_key: true
       add :user_id, :bigint, primary_key: true
       add :xp, :bigint
