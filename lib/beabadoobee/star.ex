@@ -44,20 +44,50 @@ defmodule Beabadoobee.Star do
     star_msg = Nostrum.Api.create_message!(
       guild.starboard_channel_id,
       content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}",
-      embeds: [gen_embed(msg, stars, guild.guild_id)]
+      embeds: [gen_embed(msg, stars)],
+      components: [
+        %{
+          type: 1,
+          components: [
+            %{
+              type: 2,
+              style: 5,
+              label: "Jump to message",
+              url: jump_url(guild.guild_id, msg.channel_id, msg.id)
+            }
+          ]
+        }
+      ]
       )
     Beabadoobee.Database.Stars.insert_star(msg.id, star_msg.id, guild.guild_id, msg.channel_id)
   end
 
   def edit_star(msg, star_id, stars, guild) do
-    Nostrum.Api.edit_message!(guild.starboard_channel_id, star_id, content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}", embeds: [gen_embed(msg, stars, guild.guild_id)])
+    Nostrum.Api.edit_message!(
+      guild.starboard_channel_id,
+      star_id,
+      content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}",
+      embeds: [gen_embed(msg, stars)],
+      components: [
+        %{
+          type: 1,
+          components: [
+            %{
+              type: 2,
+              style: 5,
+              label: "Jump to message",
+              url: jump_url(guild.guild_id, msg.channel_id, msg.id)
+            }
+          ]
+        }
+      ]
+      )
   end
 
-  def gen_embed(msg, stars, guild_id) do
+  def gen_embed(msg, stars) do
     %Nostrum.Struct.Embed{}
     |> put_author(msg.author.username, "", Nostrum.Struct.User.avatar_url(msg.author))
     |> put_description(msg.content)
-    |> put_field("Original", jump_url(guild_id, msg.channel_id, msg.id))
     |> put_color(gen_color(stars))
     |> put_timestamp(DateTime.to_iso8601(msg.timestamp))
     |> maybe_put_image(msg)
