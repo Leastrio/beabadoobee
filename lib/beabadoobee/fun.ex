@@ -25,6 +25,6 @@ defmodule Beabadoobee.Fun do
   end
 
   def handle_meow(%Nostrum.Struct.Message{} = msg) do
-    Beabadoobee.Database.Member.upsert_meow(msg.guild_id, msg.author.id)
+    Beabadoobee.Database.Members.upsert_meow(msg.guild_id, msg.author.id)
   end
 end

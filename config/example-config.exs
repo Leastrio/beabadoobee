@@ -32,8 +32,6 @@ config :beabadoobee,
   welcome_role: 0,
   guild_id: 0,
   lastfm_key: "key",
-  starboard: 0,
-  pluto: 0,
   roles: %{
     level_5: 0,
     level_10: 0,
