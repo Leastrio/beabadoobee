@@ -10,8 +10,8 @@ services:
     ports:
       - 5432:5432
     environment:
+      POSTGRES_USER: beabadoobee
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: beabadoobee
     volumes:
       - db-data:/var/lib/postgresql/data
   insta-alerts:

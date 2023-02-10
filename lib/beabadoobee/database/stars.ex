@@ -5,6 +5,8 @@ defmodule Beabadoobee.Database.Stars do
   @primary_key false
   schema "stars" do
     field :msg_id, :integer, primary_key: true
+    field :guild_id, :integer
+    field :channel_id, :integer
     field :starboard_msg_id, :integer
   end
 

@@ -2,7 +2,7 @@ import Config
 
 config :beabadoobee, Beabadoobee.Repo,
   database: "beabadoobee",
-  username: "postgres",
+  username: "beabadoobee",
   password: "password",
   hostname: "database"
 

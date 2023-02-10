@@ -3,22 +3,20 @@ defmodule Beabadoobee.Star do
   import Bitwise
   require Logger
 
-  @starboard_channel Application.compile_env!(:beabadoobee, :starboard)
-  @pluto_id Application.compile_env!(:beabadoobee, :pluto)
-
   def handle_reaction_event({type, reaction}) do
-    if reaction.guild_id == @pluto_id and reaction.channel_id != @starboard_channel and reaction.emoji.name == "💧" do
+    guild = Beabadoobee.Database.Guilds.get_guild(reaction.guild_id)
+    if reaction.emoji.name == "💧" and guild != nil and Map.get(guild, :starboard_channel_id) != nil and reaction.channel_id != guild.starboard_channel_id do
       try do
         message = Nostrum.Api.get_channel_message!(reaction.channel_id, reaction.message_id)
         star_count = case message.reactions do
           nil -> 0
           reactions -> Enum.find(reactions, fn r -> r.emoji.name == "💧" end).count
         end
-        
-        if star_count >= 3 do
+
+        if star_count >= guild.min_stars do
           case type do
-            :add -> Beabadoobee.Star.handle_star(message, star_count)
-            :remove -> Beabadoobee.Star.handle_star_remove(message, star_count)
+            :add -> Beabadoobee.Star.handle_star(message, star_count, guild)
+            :remove -> Beabadoobee.Star.handle_star_remove(message, star_count, guild)
           end
         end
       rescue
@@ -28,38 +26,38 @@ defmodule Beabadoobee.Star do
     end
   end
 
-  def handle_star(msg, stars) do
+  def handle_star(msg, stars, guild) do
     case Beabadoobee.Database.Stars.get_star_msg(msg.id) do
-      nil -> send_new_star(msg, stars)
-      star_msg -> edit_star(msg, star_msg.starboard_msg_id, stars)
+      nil -> send_new_star(msg, stars, guild)
+      star_msg -> edit_star(msg, star_msg.starboard_msg_id, stars, guild)
     end
   end
 
-  def handle_star_remove(msg, stars) do
+  def handle_star_remove(msg, stars, guild) do
     case Beabadoobee.Database.Stars.get_star_msg(msg.id) do
       nil -> :ok
-      star_msg -> edit_star(msg, star_msg.starboard_msg_id, stars)
+      star_msg -> edit_star(msg, star_msg.starboard_msg_id, stars, guild)
     end
   end
 
-  def send_new_star(msg, stars) do
+  def send_new_star(msg, stars, guild) do
     star_msg = Nostrum.Api.create_message!(
-      @starboard_channel,
+      guild.starboard_channel_id,
       content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}",
-      embeds: [gen_embed(msg, stars)]
+      embeds: [gen_embed(msg, stars, guild.guild_id)]
       )
     Beabadoobee.Database.Stars.insert_star(msg.id, star_msg.id)
   end
 
-  def edit_star(msg, star_id, stars) do
-    Nostrum.Api.edit_message!(@starboard_channel, star_id, content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}", embeds: [gen_embed(msg, stars)])
+  def edit_star(msg, star_id, stars, guild) do
+    Nostrum.Api.edit_message!(guild.starboard_channel_id, star_id, content: "#{star_emoji(stars)} **#{stars}** #{Beabadoobee.Utils.format_ping({:channel, msg.channel_id})}", embeds: [gen_embed(msg, stars, guild.guild_id)])
   end
 
-  def gen_embed(msg, stars) do
+  def gen_embed(msg, stars, guild_id) do
     %Nostrum.Struct.Embed{}
     |> put_author(msg.author.username, "", Nostrum.Struct.User.avatar_url(msg.author))
     |> put_description(msg.content)
-    |> put_field("Original", jump_url(msg.channel_id, msg.id))
+    |> put_field("Original", jump_url(guild_id, msg.channel_id, msg.id))
     |> put_color(gen_color(stars))
     |> put_timestamp(DateTime.to_iso8601(msg.timestamp))
     |> maybe_put_image(msg)
@@ -76,18 +74,18 @@ defmodule Beabadoobee.Star do
 
   def gen_color(stars) do
     p = cond do
-      stars / 8 > 1.0 -> 1.0
-      true -> stars / 8
+      stars / 13 > 1.0 -> 1.0
+      true -> stars / 13
     end
 
-    red = trunc((62 * p) + (212 * (1 - p)))
-    green = trunc((183 * p) + (239 * (1 - p)))
+    red = trunc((0 * p) + (230 * (1 - p)))
+    green = trunc((162 * p) + (246 * (1 - p)))
     blue = 255
     (red <<< 16) + (green <<< 8) + blue
   end
 
-  def jump_url(channel_id, msg_id) do
-    "[Jump!](https://discord.com/channels/1055344742956806194/#{channel_id}/#{msg_id})"
+  def jump_url(guild_id, channel_id, msg_id) do
+    "[Jump!](https://discord.com/channels/#{guild_id}/#{channel_id}/#{msg_id})"
   end
 
   def star_emoji(stars) do

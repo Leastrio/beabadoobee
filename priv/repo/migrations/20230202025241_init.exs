@@ -5,6 +5,8 @@ defmodule Beabadoobee.Repo.Migrations.Init do
     create table(:guilds, primary_key: false) do
       add :guild_id, :bigint, primary_key: true
       add :meow_channel_id, :bigint
+      add :starboard_channel_id, :bigint
+      add :min_stars, :integer
     end
 
     create table(:lastfm, primary_key: false) do
