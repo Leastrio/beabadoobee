@@ -115,7 +115,7 @@ defmodule Beabadoobee.Star do
   end
 
   def jump_url(guild_id, channel_id, msg_id) do
-    "[Jump!](https://discord.com/channels/#{guild_id}/#{channel_id}/#{msg_id})"
+    "https://discord.com/channels/#{guild_id}/#{channel_id}/#{msg_id}"
   end
 
   def star_emoji(stars) do
