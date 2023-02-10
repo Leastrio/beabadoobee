@@ -122,10 +122,10 @@ async function do_post(data: any) {
 
 async function post_alert(body: any) {
     try {
-        let msg = await rest.post(Routes.channelMessages(CHANNEL_ID), {
+        let msg: any = await rest.post(Routes.channelMessages(CHANNEL_ID), {
             body: body
         })
-        console.log(msg)
+        await rest.post(Routes.channelMessageCrosspost(CHANNEL_ID, msg["id"]))
     } catch (error) {
         console.error(error)
     }
