@@ -66,7 +66,7 @@ defmodule Beabadoobee.Star do
   def maybe_put_image(embed, msg) do
     with [head, _tail] <- msg.attachments,
       true <- Regex.match?(~r/.*((\.jpg)|(\.png)|(\.webp))/i, head.url) do
-        embed |> put_image(head.url)
+        embed |> put_image(head.proxy_url)
     else
       _ -> embed
     end
