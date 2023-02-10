@@ -1,4 +1,4 @@
-defmodule Beabadoobee.Database.Member do
+defmodule Beabadoobee.Database.Members do
   use Ecto.Schema
 
   @primary_key false

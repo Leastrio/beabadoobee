@@ -16,7 +16,7 @@ defmodule Beabadoobee.Commands.MeowTop do
   end
 
   defp get_top(guild_id) do
-    query = from u in Beabadoobee.Database.Levels,
+    query = from u in Beabadoobee.Database.Members,
       where: u.guild_id == ^guild_id,
       limit: 10,
       order_by: [desc: :meow_count]
