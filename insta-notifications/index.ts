@@ -68,24 +68,32 @@ async function loginToInstagram(ig: IgApiClientExt) {
 }
 
 async function handle_push(data: any, ig: any) {
-    switch(data['pushCategory']) {
-        case 'subscribed_reel_post':
-            await do_reel(data, ig);
-            break;
-        case 'post':
-            await do_post(data);
-            break;
-        default:
-            break;
+    try {
+        switch(data['pushCategory']) {
+            case 'subscribed_reel_post':
+                await do_reel(ig);
+                break;
+            case 'post':
+                await do_post(data);
+                break;
+            default:
+                break;
+        }
+    } catch(error) {
+        console.error(error);
     }
-    console.log(data);
 }
 
-async function do_reel(data: any, ig: any) {
+async function do_reel(ig: any) {
     let stories = await ig.feed.userStory(427170733).items();
+    let embed = new EmbedBuilder()
+        .setImage(stories[stories.length - 1]["image_versions2"]["candidates"][0]["url"])
+        .setColor(0xE1306C)
+        .toJSON()
 
     await post_alert({
-        content: `<@&${ROLE_ID}> New Story!\n${stories[stories.length - 1]["video_versions"][0]["url"]}`,
+        content: `<@&${ROLE_ID}> New Story!`,
+        embeds: [embed],
         components: [{
             type: 1,
             components: [{
