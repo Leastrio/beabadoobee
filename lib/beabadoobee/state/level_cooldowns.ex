@@ -27,12 +27,12 @@ defmodule Beabadoobee.State.LevelCooldowns do
 
   def handle_cast({:enqueue, {guild_id, user_id}}, state) do
     new_state = Map.update(state, guild_id, [user_id], fn curr -> curr ++ [user_id] end)
-    Process.send_after(self(), {:dequeue, user_id}, :timer.minutes(1))
+    Process.send_after(self(), {:dequeue, {guild_id, user_id}}, :timer.minutes(1))
     {:noreply, new_state}
   end
 
   def handle_info({:dequeue, {guild_id, user_id}}, state) do
-    new_state = Map.get_and_update(state, guild_id, fn curr ->
+    {_curr, new_state} = Map.get_and_update(state, guild_id, fn curr ->
       {curr, curr -- [user_id]}
     end)
     {:noreply, new_state}
