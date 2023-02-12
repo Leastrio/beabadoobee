@@ -12,10 +12,10 @@ defmodule Beabadoobee.Consumer do
     Consumer.start_link(__MODULE__)
   end
 
-  def handle_event({:READY, _ready, _ws_state}) do
+  def handle_event({:READY, ready, _ws_state}) do
     Beabadoobee.Invoker.register_commands()
     Nostrum.Api.update_status(:online, "Ripples", 2)
-    Logger.info("Bot is ready")
+    Logger.info("#{ready.user.username} is now ready!")
   end
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) when msg.author.bot do
@@ -25,6 +25,7 @@ defmodule Beabadoobee.Consumer do
   end
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) do
+    Beabadoobee.Levels.handle(msg)
     if Regex.match?(~r/m+ *e+ *o+ *w+/i, msg.content) do
       Fun.handle_meow(msg)
     end
