@@ -12,7 +12,11 @@ const writeFileAsync = promisify(writeFile);
 const readFileAsync = promisify(readFile);
 const existsAsync = promisify(exists);
 
-const IG_USERNAME: any = process.env.USERNAME, IG_PASSWORD: any = process.env.PASSWORD, CHANNEL_ID: any = process.env.CHANNEL_ID, TOKEN: any = process.env.TOKEN, ROLE_ID: any = process.env.ROLE_ID;
+const IG_USERNAME: any = process.env.USERNAME,
+    IG_PASSWORD: any = process.env.PASSWORD,
+    CHANNEL_ID: any = process.env.CHANNEL_ID,
+    TOKEN: any = process.env.TOKEN,
+    BEACORD_CHANNEL_ID: any = process.env.beacord;
 const rest = new REST({ version: '10' }).setToken(TOKEN);
 const igClient = new IgApiClient();
 
@@ -92,7 +96,7 @@ async function do_reel(ig: any) {
         .toJSON()
 
     await post_alert({
-        content: `<@&${ROLE_ID}> New Story!`,
+        content: `New Story!`,
         embeds: [embed],
         components: [{
             type: 1,
@@ -114,7 +118,7 @@ async function do_post(data: any) {
         .toJSON()
     
     await post_alert({
-        content: `<@&${ROLE_ID}> New Post!`,
+        content: `New Post!`,
         embeds: [embed],
         components: [{
             type: 1,
@@ -130,6 +134,9 @@ async function do_post(data: any) {
 
 async function post_alert(body: any) {
     try {
+        await rest.post(Routes.channelMessages(BEACORD_CHANNEL_ID), {
+            body: body
+        })
         let msg: any = await rest.post(Routes.channelMessages(CHANNEL_ID), {
             body: body
         })
