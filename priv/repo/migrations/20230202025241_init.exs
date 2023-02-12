@@ -14,11 +14,10 @@ defmodule Beabadoobee.Repo.Migrations.Init do
       add :username, :string
     end
 
-    create table(:members, primary_key: false) do
+    create table(:meows, primary_key: false) do
       add :guild_id, :bigint, primary_key: true
       add :user_id, :bigint, primary_key: true
-      add :xp, :bigint
-      add :meow_count, :bigint
+      add :meow_count, :integer
     end
 
     create table(:role_rewards, primary_key: false) do
@@ -26,6 +25,5 @@ defmodule Beabadoobee.Repo.Migrations.Init do
       add :role_id, :bigint, null: false
       add :requirement, :bigint, null: false
     end
-
   end
 end
