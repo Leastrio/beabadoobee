@@ -3,10 +3,10 @@ defmodule Beabadoobee.Levels do
 
   def handle(%Nostrum.Struct.Message{} = msg) do
     if LevelCooldowns.guild_enabled(msg.guild_id) do
-      if !LevelCooldowns.in_cooldown(msg.author.id) do
+      if !LevelCooldowns.in_cooldown(msg.guild_id, msg.author.id) do
         new_xp = gen_xp()
         Beabadoobee.Database.Levels.upsert_xp(msg.guild_id, msg.author.id, new_xp)
-        LevelCooldowns.enqueue(msg.author.id)
+        LevelCooldowns.enqueue(msg.guild_id, msg.author.id)
         member = Beabadoobee.Database.Levels.get_member(msg.guild_id, msg.author.id)
         old_level = calc_level(member.xp - new_xp)
         new_level = calc_level(member.xp)
