@@ -48,7 +48,10 @@ defmodule Beabadoobee.State.LevelCooldowns do
   end
 
   def in_cooldown(guild_id, user_id) do
-    Enum.member?(Map.get(GenServer.call(__MODULE__, :queue), guild_id), user_id)
+    case Map.get(GenServer.call(__MODULE__, :queue), guild_id) do
+      nil -> false
+      users -> Enum.member?(users, user_id)
+    end
   end
 
   def enqueue(guild_id, user_id), do: GenServer.cast(__MODULE__, {:enqueue, {guild_id, user_id}})
