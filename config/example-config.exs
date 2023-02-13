@@ -31,6 +31,7 @@ config :beabadoobee,
   general_chat: 0,
   welcome_role: 0,
   guild_id: 0,
+  mee6_cookie: "",
   lastfm_key: "key",
   roles: %{
     level_5: 0,
