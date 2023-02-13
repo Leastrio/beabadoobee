@@ -27,7 +27,9 @@ defmodule Beabadoobee.MixProject do
       {:postgrex, ">= 0.0.0"},
       {:tesla, "~> 1.4"},
       {:hackney, "~> 1.17"},
-      {:jason, ">= 1.0.0"}
+      {:jason, ">= 1.0.0"},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end
 end

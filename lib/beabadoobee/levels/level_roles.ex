@@ -17,26 +17,37 @@ defmodule Beabadoobee.Levels.LevelRoles do
     cond do
       String.contains?(message.content, "you r now level 5! <3 <3") ->
         give_role(@level_5, message)
+
       String.contains?(message.content, "you r now level 10! <3 <3") ->
         give_role(@level_10, message)
+
       String.contains?(message.content, "you r now level 15! <3 <3") ->
         give_role(@level_15, message)
+
       String.contains?(message.content, "you r now level 20! <3 <3") ->
         give_role(@level_20, message)
+
       String.contains?(message.content, "you r now level 25! <3 <3") ->
         give_role(@level_25, message)
+
       String.contains?(message.content, "you r now level 30! <3 <3") ->
         give_role(@level_30, message)
+
       String.contains?(message.content, "you r now level 35! <3 <3") ->
         give_role(@level_35, message)
+
       String.contains?(message.content, "you r now level 40! <3 <3") ->
         give_role(@level_40, message)
+
       String.contains?(message.content, "you r now level 45! <3 <3") ->
         give_role(@level_45, message)
+
       String.contains?(message.content, "you r now level 50! <3 <3") ->
         give_role(@level_50, message)
+
       String.contains?(message.content, "you r now level 55! <3 <3") ->
         give_role(@level_55, message)
+
       String.contains?(message.content, "you r now level 60! <3 <3") ->
         give_role(@level_60, message)
 
@@ -46,8 +57,15 @@ defmodule Beabadoobee.Levels.LevelRoles do
   end
 
   def give_role(level_id, %{mentions: [users]}) do
-    user_id = users
+    user_id =
+      users
       |> Map.get(:id)
-    Nostrum.Api.add_guild_member_role(@guild_id, user_id, level_id, "Automatically added level role.")
+
+    Nostrum.Api.add_guild_member_role(
+      @guild_id,
+      user_id,
+      level_id,
+      "Automatically added level role."
+    )
   end
 end

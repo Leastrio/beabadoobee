@@ -4,15 +4,18 @@ defmodule Beabadoobee.Database.Stars do
 
   @primary_key false
   schema "stars" do
-    field :msg_id, :integer, primary_key: true
-    field :guild_id, :integer
-    field :channel_id, :integer
-    field :starboard_msg_id, :integer
+    field(:msg_id, :integer, primary_key: true)
+    field(:guild_id, :integer)
+    field(:channel_id, :integer)
+    field(:starboard_msg_id, :integer)
   end
 
   def get_star_msg(id) do
-    query = from e in Beabadoobee.Database.Stars,
-      where: e.msg_id == ^id
+    query =
+      from(e in Beabadoobee.Database.Stars,
+        where: e.msg_id == ^id
+      )
+
     Beabadoobee.Repo.one(query)
   end
 

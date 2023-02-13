@@ -16,7 +16,7 @@ config :nostrum,
     :guild_message_reactions
   ],
   caches: %{
-    guilds: Nostrum.Cache.GuildCache.NoOp,
+    guilds: Nostrum.Cache.GuildCache.NoOp
   }
 
 config :logger,
@@ -44,5 +44,5 @@ config :beabadoobee,
     level_45: 0,
     level_50: 0,
     level_55: 0,
-    level_60: 0,
+    level_60: 0
   }

@@ -22,17 +22,18 @@ defmodule Beabadoobee.Commands.Link do
 
   @impl true
   def handle_application_command(interaction, options) do
-    username = options
-    |> List.first()
-    |> Map.get(:value)
+    username =
+      options
+      |> List.first()
+      |> Map.get(:value)
 
     with 200 <- Beabadoobee.Lastfm.user(username).status,
-        {:ok, _} <- check_update(interaction.user.id, username) do
-          {:simple, content: "Successfully linked your discord account to `#{username}`"}
-        else
-          _ ->
-            {:simple, content: "An error happened, make sure you spelt your username correctly"}
-        end
+         {:ok, _} <- check_update(interaction.user.id, username) do
+      {:simple, content: "Successfully linked your discord account to `#{username}`"}
+    else
+      _ ->
+        {:simple, content: "An error happened, make sure you spelt your username correctly"}
+    end
   end
 
   defp check_update(user_id, username) do

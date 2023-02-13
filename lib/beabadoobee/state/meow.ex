@@ -18,10 +18,15 @@ defmodule Beabadoobee.State.Meow do
 
   def init(_) do
     :ets.new(@table_name, @table_opts)
-    query = from g in Beabadoobee.Database.Guilds,
-      where: not is_nil(g.meow_channel_id)
+
+    query =
+      from(g in Beabadoobee.Database.Guilds,
+        where: not is_nil(g.meow_channel_id)
+      )
+
     Beabadoobee.Repo.all(query)
     |> fill_ets()
+
     {:ok, %{}}
   end
 
@@ -42,9 +47,12 @@ defmodule Beabadoobee.State.Meow do
 
   def fill_ets(nil), do: :ok
   def fill_ets([]), do: :ok
+
   def fill_ets([head | tail]) do
     case tail do
-      [] -> :ets.insert(@table_name, {head.guild_id, head.meow_channel_id, random_num()})
+      [] ->
+        :ets.insert(@table_name, {head.guild_id, head.meow_channel_id, random_num()})
+
       _ ->
         :ets.insert(@table_name, {head.guild_id, head.meow_channel_id, random_num()})
         fill_ets(tail)

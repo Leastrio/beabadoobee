@@ -16,10 +16,13 @@ defmodule Beabadoobee.Commands.MeowTop do
   end
 
   defp get_top(guild_id) do
-    query = from u in Beabadoobee.Database.Meows,
-      where: u.guild_id == ^guild_id,
-      limit: 10,
-      order_by: [desc: :meow_count]
+    query =
+      from(u in Beabadoobee.Database.Meows,
+        where: u.guild_id == ^guild_id,
+        limit: 10,
+        order_by: [desc: :meow_count]
+      )
+
     Beabadoobee.Repo.all(query)
   end
 
@@ -31,6 +34,7 @@ defmodule Beabadoobee.Commands.MeowTop do
 
   def gen_desc(_desc, _count, nil), do: "Noone has meowed yet..."
   def gen_desc(_desc, _count, []), do: "Noone has meowed yet..."
+
   def gen_desc(desc, count, [head | tail]) do
     case tail do
       [] -> desc <> "\n" <> gen_rank(count, head)

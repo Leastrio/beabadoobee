@@ -23,11 +23,12 @@ defmodule Beabadoobee.Commands.Profile do
 
   @impl true
   def handle_application_command(interaction, options) do
-    user = case options do
-      [user] -> user.value
-      _ -> interaction.user.id
-    end
-    |> get_user()
+    user =
+      case options do
+        [user] -> user.value
+        _ -> interaction.user.id
+      end
+      |> get_user()
 
     case user do
       :error -> {:simple, content: "User does not have lastfm linked."}
@@ -37,7 +38,9 @@ defmodule Beabadoobee.Commands.Profile do
 
   defp get_user(id) do
     case Beabadoobee.Repo.get(Beabadoobee.Database.Lastfm, id) do
-      nil -> :error
+      nil ->
+        :error
+
       user ->
         Beabadoobee.Lastfm.user(user.username)
     end
@@ -48,7 +51,10 @@ defmodule Beabadoobee.Commands.Profile do
     |> put_title("#{user["name"]}'s profile")
     |> put_url(user["url"])
     |> put_thumbnail(Enum.find(user["image"], fn image -> image["size"] == "large" end)["#text"])
-    |> put_field("Info", "Username: **#{user["name"]}**\nRegistered: <t:#{user["registered"]["unixtime"]}:D> (<t:#{user["registered"]["unixtime"]}:R>)")
+    |> put_field(
+      "Info",
+      "Username: **#{user["name"]}**\nRegistered: <t:#{user["registered"]["unixtime"]}:D> (<t:#{user["registered"]["unixtime"]}:R>)"
+    )
     |> put_field("Play Counts", "")
   end
 end

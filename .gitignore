@@ -28,3 +28,5 @@ beabadoobee-*.tar
 config.exs
 
 node_modules
+
+.elixir_ls

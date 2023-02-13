@@ -3,8 +3,8 @@ defmodule Beabadoobee.Database.Lastfm do
 
   @primary_key false
   schema "lastfm" do
-    field :user_id, :integer, primary_key: true
-    field :username, :string
+    field(:user_id, :integer, primary_key: true)
+    field(:username, :string)
   end
 
   def changeset(user, params \\ %{}) do

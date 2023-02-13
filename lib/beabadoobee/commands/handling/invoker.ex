@@ -17,7 +17,7 @@ defmodule Beabadoobee.Invoker do
     rescue
       e ->
         try do
-          Logger.error(inspect e)
+          Logger.error(inspect(e))
           Beabadoobee.Utils.reply(interaction, content: "An error occurred")
         rescue
           _ -> :ok
@@ -43,7 +43,7 @@ defmodule Beabadoobee.Invoker do
     |> build_payloads()
     |> Enum.each(fn payload ->
       case Nostrum.Api.create_global_application_command(payload) do
-        {:error, error} -> IO.inspect(error)
+        {:error, error} -> Logger.error(error)
         _ -> :ok
       end
     end)
@@ -77,7 +77,6 @@ defmodule Beabadoobee.Invoker do
   defp command_attributes(command) do
     if function_exported?(command, :attributes, 0), do: command.attributes(), else: %{}
   end
-
 
   defp translate_option_type(:string), do: 3
   defp translate_option_type(integer) when is_integer(integer), do: integer

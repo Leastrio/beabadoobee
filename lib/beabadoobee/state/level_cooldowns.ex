@@ -18,10 +18,15 @@ defmodule Beabadoobee.State.LevelCooldowns do
 
   def init(state) do
     :ets.new(@table_name, @table_opts)
-    query = from g in Beabadoobee.Database.Guilds,
-      where: not is_nil(g.level_up_channel_id)
+
+    query =
+      from(g in Beabadoobee.Database.Guilds,
+        where: not is_nil(g.level_up_channel_id)
+      )
+
     Beabadoobee.Repo.all(query)
     |> fill_ets()
+
     {:ok, state}
   end
 
@@ -32,9 +37,11 @@ defmodule Beabadoobee.State.LevelCooldowns do
   end
 
   def handle_info({:dequeue, {guild_id, user_id}}, state) do
-    {_curr, new_state} = Map.get_and_update(state, guild_id, fn curr ->
-      {curr, curr -- [user_id]}
-    end)
+    {_curr, new_state} =
+      Map.get_and_update(state, guild_id, fn curr ->
+        {curr, curr -- [user_id]}
+      end)
+
     {:noreply, new_state}
   end
 
@@ -58,9 +65,12 @@ defmodule Beabadoobee.State.LevelCooldowns do
 
   def fill_ets(nil), do: :ok
   def fill_ets([]), do: :ok
+
   def fill_ets([head | tail]) do
     case tail do
-      [] -> :ets.insert(@table_name, {head.guild_id, head.level_up_channel_id})
+      [] ->
+        :ets.insert(@table_name, {head.guild_id, head.level_up_channel_id})
+
       _ ->
         :ets.insert(@table_name, {head.guild_id, head.level_up_channel_id})
         fill_ets(tail)
