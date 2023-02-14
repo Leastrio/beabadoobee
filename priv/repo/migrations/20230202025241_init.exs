@@ -23,7 +23,7 @@ defmodule Beabadoobee.Repo.Migrations.Init do
     create table(:role_rewards, primary_key: false) do
       add :guild_id, :bigint, primary_key: true
       add :role_id, :bigint, null: false
-      add :requirement, :bigint, null: false
+      add :requirement, :bigint, primary_key: true
     end
   end
 end

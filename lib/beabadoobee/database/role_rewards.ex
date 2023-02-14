@@ -6,7 +6,7 @@ defmodule Beabadoobee.Database.RoleRewards do
   schema "role_rewards" do
     field(:guild_id, :integer, primary_key: true)
     field(:role_id, :integer)
-    field(:requirement, :integer)
+    field(:requirement, :integer, primary_key: true)
   end
 
   def get_reward(guild_id, level) do
