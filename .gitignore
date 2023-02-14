@@ -29,4 +29,5 @@ config.exs
 
 node_modules
 
-.elixir_ls
+.elixir_ls/
+
