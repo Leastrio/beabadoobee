@@ -30,26 +30,21 @@ defmodule Beabadoobee.Commands.Leaderboard do
     %Nostrum.Struct.Embed{}
     |> put_title("Leaderboard")
     |> put_color(6669007)
-    |> put_description(gen_desc(get_top(guild_id), invoker_id))
+    |> put_description(gen_desc(get_top(guild_id), invoker_id, guild_id))
   end
 
-  def gen_desc(top, invoker_id) do
+  def gen_desc(top, invoker_id, guild_id) do
     case Enum.find(top, fn u -> u.user_id == invoker_id end) do
-      nil ->
-        gen_desc("", 1, top, {false, invoker_id})
-      _ -> gen_desc("", 1, top, {true, invoker_id})
+      nil -> gen_desc("", 1, top, invoker_id) <> "\n" <> gen_rank(11, Beabadoobee.Database.Levels.get_member(guild_id, invoker_id), invoker_id)
+      _ -> gen_desc("", 1, top, invoker_id)
     end
   end
 
-  def gen_desc(_desc, _count, nil), do: "Noone has spoken yet..."
-  def gen_desc(_desc, _count, []), do: "Noone has spoken yet..."
-  def gen_desc(desc, count, [head | tail], {is_top, invoker_id}) do
+  def gen_desc(_desc, _count, [], _invoker_id), do: "No data found.."
+  def gen_desc(desc, count, [head | tail], invoker_id) do
     case tail do
-      [] -> desc <> "\n" <> gen_rank(count, head, invoker_id) <> case is_top do
-        true -> ""
-        false -> gen_rank(count, Beabadoobee.Database.Levels.get_member(head.guild_id, invoker_id), invoker_id)
-      end
-      _ -> gen_desc(desc <> "\n" <> gen_rank(count, head, invoker_id), count + 1, tail)
+      [] -> desc <> "\n" <> gen_rank(count, head, invoker_id)
+      _ -> gen_desc(desc <> "\n" <> gen_rank(count, head, invoker_id), count + 1, tail, invoker_id)
     end
   end
 
