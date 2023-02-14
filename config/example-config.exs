@@ -32,18 +32,4 @@ config :beabadoobee,
   welcome_role: 0,
   guild_id: 0,
   mee6_cookie: "",
-  lastfm_key: "key",
-  roles: %{
-    level_5: 0,
-    level_10: 0,
-    level_15: 0,
-    level_20: 0,
-    level_25: 0,
-    level_30: 0,
-    level_35: 0,
-    level_40: 0,
-    level_45: 0,
-    level_50: 0,
-    level_55: 0,
-    level_60: 0
-  }
+  lastfm_key: "key"
