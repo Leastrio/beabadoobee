@@ -34,7 +34,7 @@ defmodule Beabadoobee.Levels do
           reward = Beabadoobee.Database.RoleRewards.get_reward(msg.guild_id, new_level)
 
           if !is_nil(reward) do
-            Nostrum.Api.modify_guild_member(msg.guild_id, msg.author.id, roles: [reward.role_id])
+            Nostrum.Api.add_guild_member_role(msg.guild_id, msg.author.id, reward.role_id, "Automatic role adding, level #{level}")
           end
         end
       end
