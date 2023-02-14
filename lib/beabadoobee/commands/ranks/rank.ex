@@ -40,7 +40,11 @@ defmodule Beabadoobee.Commands.Rank do
       entry ->
         level = Beabadoobee.Levels.calc_level(entry.xp)
         user = Nostrum.Api.get_user!(entry.user_id)
-        "#{Nostrum.Struct.User.full_name(user)} is level #{level}"
+
+        last_level_req = Beabadoobee.Levels.xp_for_level(level)
+        next_level_req = Beabadoobee.Levels.xp_for_level(level + 1)
+        perc = ((entry.xp - last_level_req) / (next_level_req - last_level_req))
+        "#{user.username} is level #{level}\n#{perc}% on the way to level #{level + 1}"
     end
   end
 end
