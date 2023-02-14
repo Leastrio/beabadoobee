@@ -7,7 +7,8 @@ defmodule Beabadoobee.Invoker do
       "profile" => Beabadoobee.Commands.Profile,
       "meow" => Beabadoobee.Commands.Meow,
       "meowtop" => Beabadoobee.Commands.MeowTop,
-      "rank" => Beabadoobee.Commands.Rank
+      "rank" => Beabadoobee.Commands.Rank,
+      "leaderboard" => Beabadoobee.Commands.Leaderboard
     }
 
   def handle_interaction(interaction) do
