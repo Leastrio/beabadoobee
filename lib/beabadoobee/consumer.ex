@@ -20,9 +20,7 @@ defmodule Beabadoobee.Consumer do
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state})
       when msg.author.bot do
-    if msg.author.id == 159_985_870_458_322_944 do
-      Beabadoobee.Levels.LevelRoles.handle_message(msg)
-    end
+    :noop
   end
 
   def handle_event({:MESSAGE_CREATE, %Nostrum.Struct.Message{} = msg, _ws_state}) do
