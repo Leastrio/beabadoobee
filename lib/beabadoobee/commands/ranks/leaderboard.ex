@@ -51,7 +51,7 @@ defmodule Beabadoobee.Commands.Leaderboard do
   def gen_rank(count, user, invoker_id) do
     cond do
       user.user_id == invoker_id ->
-        "**#{count}:** #{Beabadoobee.Utils.format_ping({:user, user.user_id})} Level: #{Beabadoobee.Levels.calc_level(user.xp)}"
+        "**#{count}: #{Beabadoobee.Utils.format_ping({:user, user.user_id})} Level: #{Beabadoobee.Levels.calc_level(user.xp)}**"
       true -> "#{count}: #{Beabadoobee.Utils.format_ping({:user, user.user_id})} Level: #{Beabadoobee.Levels.calc_level(user.xp)}"
     end
   end
