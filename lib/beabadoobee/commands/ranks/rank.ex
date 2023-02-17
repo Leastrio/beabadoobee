@@ -33,18 +33,18 @@ defmodule Beabadoobee.Commands.Rank do
   end
 
   defp gen_resp(user_id, guild_id) do
-    case Beabadoobee.Database.Levels.get_member(guild_id, user_id) do
+    case Beabadoobee.Database.Levels.get_user_rank(guild_id, user_id) do
       nil ->
         "User has not spoken yet.."
 
-      entry ->
-        level = Beabadoobee.Levels.calc_level(entry.xp)
-        user = Nostrum.Api.get_user!(entry.user_id)
+      [user_id, xp, rank] ->
+        level = Beabadoobee.Levels.calc_level(xp)
+        user = Nostrum.Api.get_user!(user_id)
 
         last_level_req = Beabadoobee.Levels.xp_for_level(level)
         next_level_req = Beabadoobee.Levels.xp_for_level(level + 1)
-        perc = trunc(Float.round(((entry.xp - last_level_req) / (next_level_req - last_level_req)), 2) * 100)
-        "#{user.username} is level #{level}\n#{perc}% on the way to level #{level + 1}!"
+        perc = trunc(Float.round(((xp - last_level_req) / (next_level_req - last_level_req)), 2) * 100)
+        "#{user.username} is level #{level}\n#{xp - last_level_req} / #{next_level_req - last_level_req}\n#{perc}% on the way to level #{level + 1}\n##{rank} in the server!"
     end
   end
 end
