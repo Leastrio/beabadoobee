@@ -2,7 +2,6 @@ defmodule Beabadoobee.Commands.MeowTop do
   @behaviour Beabadoobee.Command
   require Logger
   import Nostrum.Struct.Embed
-  import Ecto.Query
 
   @impl true
   def description(), do: "View top meowers in the server"
@@ -12,36 +11,29 @@ defmodule Beabadoobee.Commands.MeowTop do
 
   @impl true
   def handle_application_command(interaction, _options) do
-    {:simple, embeds: [generate_embed(interaction.guild_id)]}
+    {:simple, embeds: [generate_embed(interaction.guild_id, interaction.user.id)]}
   end
 
-  defp get_top(guild_id) do
-    query =
-      from(u in Beabadoobee.Database.Meows,
-        where: u.guild_id == ^guild_id,
-        limit: 10,
-        order_by: [desc: :meow_count]
-      )
-
-    Beabadoobee.Repo.all(query)
-  end
-
-  defp generate_embed(guild_id) do
+  defp generate_embed(guild_id, invoker_id) do
     %Nostrum.Struct.Embed{}
     |> put_title("Meow Top")
-    |> put_description(gen_desc("", 1, get_top(guild_id)))
+    |> put_description(gen_desc("", Beabadoobee.Database.Meows.get_top_and_user(guild_id, invoker_id), invoker_id))
   end
 
-  def gen_desc(_desc, _count, []), do: "Noone has meowed yet..."
+  def gen_desc(_desc, [], _invoker_id), do: "Noone has meowed yet..."
 
-  def gen_desc(desc, count, [head | tail]) do
+  def gen_desc(desc, [head | tail], invoker_id) do
     case tail do
-      [] -> desc <> "\n" <> gen_rank(count, head)
-      _ -> gen_desc(desc <> "\n" <> gen_rank(count, head), count + 1, tail)
+      [] -> desc <> "\n" <> gen_rank(head, invoker_id)
+      _ -> gen_desc(desc <> "\n" <> gen_rank(head, invoker_id), tail, invoker_id)
     end
   end
 
-  def gen_rank(count, user) do
-    "**#{count}:** #{Beabadoobee.Utils.format_ping({:user, user.user_id})} #{Beabadoobee.Utils.delimit_num(user.meow_count)} meow(s)"
+  def gen_rank([user_id, meow_count, rank], invoker_id) do
+    cond do
+      user_id == invoker_id ->
+        "**#{rank}: #{Beabadoobee.Utils.format_ping({:user, user_id})} #{meow_count} meows(s)**"
+      true -> "#{rank}: #{Beabadoobee.Utils.format_ping({:user, user_id})} #{meow_count} meows(s)"
+    end
   end
 end

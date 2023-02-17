@@ -25,4 +25,29 @@ defmodule Beabadoobee.Database.Meows do
 
     Beabadoobee.Repo.one(query)
   end
+
+  def get_top_and_user(guild_id, user_id) do
+    query = """
+    WITH userTbl AS (
+      SELECT user_id, meow_count, rank() OVER(ORDER BY meow_count DESC) as rank
+      FROM meows
+      WHERE guild_id = $1
+    )
+
+    (SELECT user_id, meow_count, rank
+      FROM userTbl
+      ORDER BY meow_count DESC
+      LIMIT 10)
+
+    UNION
+
+    SELECT user_id, meow_count, rank
+    FROM userTbl
+    WHERE user_id = $2
+    ORDER BY meow_count DESC
+    """
+
+    Ecto.Adapters.SQL.query!(Beabadoobee.Repo, query, [guild_id, user_id])
+      |> Map.get(:rows)
+  end
 end
