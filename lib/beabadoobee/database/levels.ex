@@ -25,4 +25,29 @@ defmodule Beabadoobee.Database.Levels do
 
     Beabadoobee.Repo.one(query)
   end
+
+  def get_top_and_user(guild_id, user_id) do
+    query = """
+    WITH userTbl AS (
+      SELECT user_id, xp, rank() OVER(ORDER BY xp DESC) as rank
+      FROM levels
+      WHERE guild_id = $1
+    )
+
+    (SELECT user_id, xp, rank
+      FROM userTbl
+      ORDER BY xp DESC
+      LIMIT 10)
+
+    UNION
+
+    SELECT user_id, xp, rank
+    FROM userTbl
+    WHERE user_id = $2
+    ORDER BY xp DESC
+    """
+
+    Ecto.Adapters.SQL.query!(Beabadoobee.Repo, query, [guild_id, user_id])
+      |> Map.get(:rows)
+  end
 end
