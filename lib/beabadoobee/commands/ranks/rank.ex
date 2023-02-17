@@ -44,7 +44,7 @@ defmodule Beabadoobee.Commands.Rank do
         last_level_req = Beabadoobee.Levels.xp_for_level(level)
         next_level_req = Beabadoobee.Levels.xp_for_level(level + 1)
         perc = trunc(Float.round(((xp - last_level_req) / (next_level_req - last_level_req)), 2) * 100)
-        "#{user.username} is level #{level}\n#{xp - last_level_req} / #{next_level_req - last_level_req}\n#{perc}% on the way to level #{level + 1}\n##{rank} in the server!"
+        "#{user.username} is level #{level}\n#{trunc(xp - last_level_req)} / #{trunc(next_level_req - last_level_req)}\n#{perc}% on the way to level #{level + 1}\n##{rank} in the server!"
     end
   end
 end
