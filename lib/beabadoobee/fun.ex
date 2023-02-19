@@ -3,21 +3,24 @@ defmodule Beabadoobee.Fun do
   alias Beabadoobee.State.Meow
 
   @meows ["meow", "MEOW", "MEEEEOOWWWWWW", "meow meow"]
-  @songs ["Beatopia Cultsong", "The Perfect Pair", "10:36", "Lovesong", "Ripples", "Sunny Day", "See you Soon"]
-  @webhook_id Application.compile_env!(:beabadoobee, :webhook_id)
-  @webhook_token Application.compile_env!(:beabadoobee, :webhook_token)
+  @songs ["Beatopia Cultsong", "10:36", "Sunny Day", "See you Soon", "Ripples", "the perfect pair", "broken cd", "Talk", "Lovesong", "Pictures of Us", "fairy song", "Don't get the deal", "tinkerbell is overrated", "You're here that's the thing"]
 
   def maybe_deathbed(%Nostrum.Struct.Message{} = msg) do
-    if String.contains?(String.downcase(msg.content), ["deathbed", "death bed"]) do
-      if msg.guild_id == 1072200154981089290 and Veritaserum.analyze(msg.content) >= 0 do
-        Nostrum.Api.delete_message(msg)
-        Nostrum.Api.execute_webhook(@webhook_id, @webhook_token, %{
-          content: String.replace(msg.content, ~r/d+ *e+ *a+ *t+ *h+ *b+ *e+ *d+/i, Enum.random(@songs)),
-          username: msg.author.username,
-          avatar_url: Nostrum.Struct.User.avatar_url(msg.author)
-        })
-      else
-        Nostrum.Api.create_message(msg.channel_id, content: "deathbed is trash")
+    if msg.content =~ ~r/d+ *e+ *a+ *t+ *h+ *b+ *e+ *d+/i do
+      case Beabadoobee.Database.Guilds.get_webhook(msg.guild_id) do
+        nil -> Nostrum.Api.create_message(msg.channel_id, content: "deathbed is trash")
+        [id, token] ->
+          if Veritaserum.analyze(msg.content) >= 1 do
+            Nostrum.Api.delete_message(msg)
+            Nostrum.Api.modify_webhook(id, %{channel_id: msg.channel_id})
+            Nostrum.Api.execute_webhook(id, token, %{
+              content: String.replace(msg.content, ~r/d+ *e+ *a+ *t+ *h+ *b+ *e+ *d+/i, Enum.random(@songs)),
+              username: msg.author.username,
+              avatar_url: Nostrum.Struct.User.avatar_url(msg.author)
+            })
+          else
+            Nostrum.Api.create_message(msg.channel_id, content: "deathbed is trash")
+          end
       end
     end
   end
