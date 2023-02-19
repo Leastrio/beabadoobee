@@ -32,4 +32,6 @@ config :beabadoobee,
   welcome_role: 0,
   guild_id: 0,
   mee6_cookie: "",
-  lastfm_key: "key"
+  lastfm_key: "key",
+  webhook_id: 0,
+  webhook_token: "token"

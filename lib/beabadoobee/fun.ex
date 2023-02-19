@@ -3,10 +3,22 @@ defmodule Beabadoobee.Fun do
   alias Beabadoobee.State.Meow
 
   @meows ["meow", "MEOW", "MEEEEOOWWWWWW", "meow meow"]
+  @songs ["Beatopia Cultsong", "The Perfect Pair", "10:36", "Lovesong", "Ripples", "Sunny Day", "See you Soon"]
+  @webhook_id Application.compile_env!(:beabadoobee, :webhook_id)
+  @webhook_token Application.compile_env!(:beabadoobee, :webhook_token)
 
   def maybe_deathbed(%Nostrum.Struct.Message{} = msg) do
     if String.contains?(String.downcase(msg.content), ["deathbed", "death bed"]) do
-      Nostrum.Api.create_message(msg.channel_id, content: "deathbed is trash")
+      if msg.guild_id == 1072200154981089290 and Veritaserum.analyze(msg.content) >= 0 do
+        Nostrum.Api.delete_message(msg)
+        Nostrum.Api.execute_webhook(@webhook_id, @webhook_token, %{
+          content: String.replace(msg.content, ~r/d+ *e+ *a+ *t+ *h+ *b+ *e+ *d+/i, Enum.random(@songs)),
+          username: msg.author.username,
+          avatar_url: Nostrum.Struct.User.avatar_url(msg.author)
+        })
+      else
+        Nostrum.Api.create_message(msg.channel_id, content: "deathbed is trash")
+      end
     end
   end
 

@@ -29,7 +29,8 @@ defmodule Beabadoobee.MixProject do
       {:hackney, "~> 1.17"},
       {:jason, ">= 1.0.0"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:veritaserum, "~> 0.2.2"}
     ]
   end
 end
