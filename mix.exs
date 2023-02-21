@@ -22,7 +22,7 @@ defmodule Beabadoobee.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:nostrum, github: "Leastrio/nostrum"},
+      {:nostrum, github: "Leastrio/nostrum", override: true},
       {:ecto_sql, "~> 3.0"},
       {:postgrex, ">= 0.0.0"},
       {:tesla, "~> 1.4"},
@@ -30,7 +30,8 @@ defmodule Beabadoobee.MixProject do
       {:jason, ">= 1.0.0"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
-      {:veritaserum, "~> 0.2.2"}
+      {:veritaserum, "~> 0.2.2"},
+      {:cadet, github: "Leastrio/Cadet"}
     ]
   end
 end
