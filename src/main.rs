@@ -1,0 +1,185 @@
+mod commands;
+mod context;
+mod database;
+mod message;
+mod config;
+mod utils;
+mod levels;
+
+use dashmap::DashMap;
+use rand::Rng;
+use sqlx::PgPool;
+use tokio::signal::unix::{signal, SignalKind};
+use twilight_util::builder::embed::{EmbedBuilder, ImageSource};
+use std::{
+  env,
+  error::Error,
+  sync::{atomic::{AtomicU16, AtomicBool, Ordering}, Arc},
+};
+use tracing::{error, info, warn};
+use twilight_gateway::{Config, Event, Intents, Shard, ShardId, CloseFrame};
+use twilight_http::Client;
+use twilight_model::{
+  gateway::{
+    payload::{outgoing::update_presence::UpdatePresencePayload, incoming::MemberAdd},
+    presence::{ActivityType, MinimalActivity, Status},
+  },
+  id::{Id},
+};
+
+use crate::context::BeaContext;
+
+pub type BeaResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
+
+static SHUTDOWN: AtomicBool = AtomicBool::new(false);
+
+#[tokio::main]
+async fn main() {
+  tracing_subscriber::fmt::init();
+
+  let token = std::env::var("DISCORD_TOKEN").expect("Could not find DISCORD_TOKEN");
+  let http = Client::new(token.clone());
+
+  let current_app = http
+    .current_user_application()
+    .await
+    .expect("Could not get current bot user")
+    .model()
+    .await
+    .expect("Could not deserialize user body");
+  let interaction = http.interaction(current_app.id);
+
+  // interaction
+  //     .set_global_commands(&commands::commands())
+  //     .await?;
+
+  let intents = Intents::MESSAGE_CONTENT
+    | Intents::GUILD_MESSAGES
+    | Intents::GUILD_MEMBERS
+    | Intents::GUILD_MESSAGE_REACTIONS;
+
+  let config = Config::builder(token.clone(), intents)
+    .presence(
+      UpdatePresencePayload::new(
+        vec![MinimalActivity {
+          kind: ActivityType::Listening,
+          name: "Ripples".into(),
+          url: None,
+        }
+        .into()],
+        false,
+        None,
+        Status::Online,
+      )
+      .expect("Could not create presence payload"),
+    )
+    .build();
+
+  let db = database::db_connect(&env::var("DATABASE_URL").expect("Could not find DATABASE_URL"))
+    .await
+    .expect("Could not connect to database");
+  let meow_counters = init_meow_counters(&db)
+    .await
+    .expect("Could not init meow counters");
+
+  let context = Arc::new(BeaContext {
+    http,
+    db,
+    meow_counters,
+  });
+
+  let mut shard = Shard::with_config(ShardId::ONE, config);
+  info!("Shard Created.");
+  let sender = shard.sender();
+
+  let mut sigint = signal(SignalKind::interrupt()).expect("Could not register SIGINT handler");
+	let mut sigterm = signal(SignalKind::terminate()).expect("Could not register SIGTERM handler");
+
+	tokio::spawn(async move {
+		tokio::select! {
+				_ = sigint.recv() => tracing::debug!("received SIGINT"),
+				_ = sigterm.recv() => tracing::debug!("received SIGTERM"),
+		}
+
+		tracing::debug!("shutting down");
+
+		SHUTDOWN.store(true, Ordering::Relaxed);
+    _ = sender.close(CloseFrame::NORMAL);
+	});
+
+  loop {
+    match shard.next_event().await {
+      Ok(event) => tokio::spawn(handle(event, Arc::clone(&context))),
+      Err(source) => {
+        warn!(?source, "Error receiving event");
+
+        if source.is_fatal() {
+          break;
+        }
+
+        continue;
+      }
+    };
+    if SHUTDOWN.load(Ordering::Relaxed) {
+      break;
+  }
+  }
+}
+
+async fn handle(event: Event, ctx: Arc<BeaContext>) {
+  let res: BeaResult<()> = match event {
+    Event::Ready(r) => {
+      let ready = *r;
+      info!("{} is ready", ready.user.name);
+      Ok(())
+    }
+    Event::MessageCreate(msg) => message::handle_create(ctx, *msg).await,
+    Event::MemberAdd(member_add) => {
+      if member_add.guild_id == config::BEACORD_ID {
+        send_welcome(*member_add, ctx).await
+      } else {
+        Ok(())
+      }
+    }
+    _ => Ok(()),
+  };
+  match res {
+    Ok(()) => {}
+    Err(why) => error!(why, "Error in event"),
+  }
+}
+
+async fn init_meow_counters(db: &PgPool) -> BeaResult<DashMap<i64, AtomicU16>> {
+  let counters = DashMap::new();
+  let mut rng = rand::thread_rng();
+  for guild in sqlx::query_as!(
+    config::Guild,
+    "SELECT * FROM guilds WHERE meow_channel_id IS NOT NULL"
+  )
+  .fetch_all(db)
+  .await?
+  .iter()
+  {
+    counters.insert(guild.guild_id, AtomicU16::new(rng.gen_range(250..=300)));
+  }
+  Ok(counters)
+}
+
+async fn send_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<()> {
+  let embed = EmbedBuilder::new()
+    .title("˚୨୧⋆｡˚ ⋆welcome to the beacord! ⋆ ˚｡⋆୨୧˚")
+    .description("𝗵𝗶! 𝘄𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝘁𝗵𝗲 𝗯𝗲𝗮𝗯𝗮𝗱𝗼𝗼𝗯𝗲𝗲 𝗱𝗶𝘀𝗰𝗼𝗿𝗱!
+
+    <a:beagroovymove:927560576052383815> make sure to check out <#925652608620834878>, <#925652969855262750>, <#925653153565777960> <3
+
+    We have an ongoing event happening! Check it out in <#925653068958277683>
+
+    ***what's your favorite bea song?***")
+    .color(6960383)
+    .thumbnail(ImageSource::url("https://media.giphy.com/media/KkVPbGYUAZYdvcdv0A/giphy.gif")?)
+    .build();
+
+  ctx.http.create_message(Id::new(config::BEACORD_GEN_ID)).content(&format!("<@&926971203309162546> <@{}>", member_add.user.id.get()))?.embeds(&[embed])?.await?;
+
+  Ok(())
+}

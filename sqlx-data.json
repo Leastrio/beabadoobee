@@ -1,0 +1,96 @@
+{
+  "db": "PostgreSQL",
+  "2cbd10e226683ce185da29fb9b88cd1b902678dd71d237a6dba19c1712363796": {
+    "describe": {
+      "columns": [
+        {
+          "name": "guild_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "meow_channel_id",
+          "ordinal": 1,
+          "type_info": "Int8"
+        },
+        {
+          "name": "starboard_channel_id",
+          "ordinal": 2,
+          "type_info": "Int8"
+        },
+        {
+          "name": "level_up_channel_id",
+          "ordinal": 3,
+          "type_info": "Int8"
+        },
+        {
+          "name": "min_stars",
+          "ordinal": 4,
+          "type_info": "Int4"
+        },
+        {
+          "name": "webhook_id",
+          "ordinal": 5,
+          "type_info": "Int8"
+        },
+        {
+          "name": "webhook_token",
+          "ordinal": 6,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": []
+      }
+    },
+    "query": "SELECT * FROM guilds WHERE meow_channel_id IS NOT NULL"
+  },
+  "438e251718f914479d1819f8bda30ba8ed6552e2aa6efb577ff2f83e8235e871": {
+    "describe": {
+      "columns": [
+        {
+          "name": "webhook_id",
+          "ordinal": 0,
+          "type_info": "Int8"
+        },
+        {
+          "name": "webhook_token",
+          "ordinal": 1,
+          "type_info": "Text"
+        }
+      ],
+      "nullable": [
+        true,
+        true
+      ],
+      "parameters": {
+        "Left": [
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n      SELECT webhook_id, webhook_token\n      FROM guilds\n      WHERE guild_id = $1\n    "
+  },
+  "f34a9b054e87e4134a78ec6ce034b58df125ea3f053e48714cc8e23e0d08c2ee": {
+    "describe": {
+      "columns": [],
+      "nullable": [],
+      "parameters": {
+        "Left": [
+          "Int8",
+          "Int8"
+        ]
+      }
+    },
+    "query": "\n          INSERT INTO meows\n          VALUES($1, $2, 1)\n          ON CONFLICT (guild_id, user_id)\n          DO UPDATE SET meow_count = meows.meow_count + 1\n        "
+  }
+}
