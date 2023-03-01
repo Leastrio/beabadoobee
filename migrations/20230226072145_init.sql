@@ -33,6 +33,6 @@ CREATE TABLE starboard (
 CREATE TABLE levels (
   guild_id BIGINT,
   user_id BIGINT,
-  xp INTEGER,
+  xp INTEGER NOT NULL,
   PRIMARY KEY (guild_id, user_id)
 );

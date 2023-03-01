@@ -1,33 +1,33 @@
 mod commands;
+mod config;
 mod context;
 mod database;
-mod message;
-mod config;
-mod utils;
 mod levels;
+mod message;
+mod utils;
 
-use dashmap::DashMap;
-use rand::Rng;
-use sqlx::PgPool;
-use tokio::signal::unix::{signal, SignalKind};
-use twilight_util::builder::embed::{EmbedBuilder, ImageSource};
 use std::{
   env,
   error::Error,
-  sync::{atomic::{AtomicU16, AtomicBool, Ordering}, Arc},
+  sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+  },
 };
+use tokio::signal::unix::{signal, SignalKind};
 use tracing::{error, info, warn};
-use twilight_gateway::{Config, Event, Intents, Shard, ShardId, CloseFrame};
+use twilight_gateway::{CloseFrame, Config, Event, Intents, Shard, ShardId};
 use twilight_http::Client;
 use twilight_model::{
   gateway::{
-    payload::{outgoing::update_presence::UpdatePresencePayload, incoming::MemberAdd},
+    payload::{incoming::MemberAdd, outgoing::update_presence::UpdatePresencePayload},
     presence::{ActivityType, MinimalActivity, Status},
   },
-  id::{Id},
+  id::Id,
 };
+use twilight_util::builder::embed::{EmbedBuilder, ImageSource};
 
-use crate::context::BeaContext;
+use crate::context::{BeaContext, BeaState};
 
 pub type BeaResult<T> = Result<T, Box<dyn Error + Send + Sync>>;
 
@@ -78,34 +78,29 @@ async fn main() {
   let db = database::db_connect(&env::var("DATABASE_URL").expect("Could not find DATABASE_URL"))
     .await
     .expect("Could not connect to database");
-  let meow_counters = init_meow_counters(&db)
-    .await
-    .expect("Could not init meow counters");
 
-  let context = Arc::new(BeaContext {
-    http,
-    db,
-    meow_counters,
-  });
+  let state = BeaState::new(&db).await;
+
+  let context = Arc::new(BeaContext { http, db, state });
 
   let mut shard = Shard::with_config(ShardId::ONE, config);
   info!("Shard Created.");
   let sender = shard.sender();
 
   let mut sigint = signal(SignalKind::interrupt()).expect("Could not register SIGINT handler");
-	let mut sigterm = signal(SignalKind::terminate()).expect("Could not register SIGTERM handler");
+  let mut sigterm = signal(SignalKind::terminate()).expect("Could not register SIGTERM handler");
 
-	tokio::spawn(async move {
-		tokio::select! {
-				_ = sigint.recv() => tracing::debug!("received SIGINT"),
-				_ = sigterm.recv() => tracing::debug!("received SIGTERM"),
-		}
+  tokio::spawn(async move {
+    tokio::select! {
+        _ = sigint.recv() => tracing::debug!("received SIGINT"),
+        _ = sigterm.recv() => tracing::debug!("received SIGTERM"),
+    }
 
-		tracing::debug!("shutting down");
+    tracing::debug!("shutting down");
 
-		SHUTDOWN.store(true, Ordering::Relaxed);
+    SHUTDOWN.store(true, Ordering::Relaxed);
     _ = sender.close(CloseFrame::NORMAL);
-	});
+  });
 
   loop {
     match shard.next_event().await {
@@ -122,7 +117,7 @@ async fn main() {
     };
     if SHUTDOWN.load(Ordering::Relaxed) {
       break;
-  }
+    }
   }
 }
 
@@ -149,22 +144,6 @@ async fn handle(event: Event, ctx: Arc<BeaContext>) {
   }
 }
 
-async fn init_meow_counters(db: &PgPool) -> BeaResult<DashMap<i64, AtomicU16>> {
-  let counters = DashMap::new();
-  let mut rng = rand::thread_rng();
-  for guild in sqlx::query_as!(
-    config::Guild,
-    "SELECT * FROM guilds WHERE meow_channel_id IS NOT NULL"
-  )
-  .fetch_all(db)
-  .await?
-  .iter()
-  {
-    counters.insert(guild.guild_id, AtomicU16::new(rng.gen_range(250..=300)));
-  }
-  Ok(counters)
-}
-
 async fn send_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<()> {
   let embed = EmbedBuilder::new()
     .title("˚୨୧⋆｡˚ ⋆welcome to the beacord! ⋆ ˚｡⋆୨୧˚")
@@ -179,7 +158,15 @@ async fn send_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<
     .thumbnail(ImageSource::url("https://media.giphy.com/media/KkVPbGYUAZYdvcdv0A/giphy.gif")?)
     .build();
 
-  ctx.http.create_message(Id::new(config::BEACORD_GEN_ID)).content(&format!("<@&926971203309162546> <@{}>", member_add.user.id.get()))?.embeds(&[embed])?.await?;
+  ctx
+    .http
+    .create_message(Id::new(config::BEACORD_GEN_ID))
+    .content(&format!(
+      "<@&926971203309162546> <@{}>",
+      member_add.user.id.get()
+    ))?
+    .embeds(&[embed])?
+    .await?;
 
   Ok(())
 }

@@ -15,5 +15,12 @@ pub struct Guild {
 #[derive(Debug)]
 pub struct Webhook {
   pub webhook_id: Option<i64>,
-  pub webhook_token: Option<String>
+  pub webhook_token: Option<String>,
+}
+
+#[derive(Debug)]
+pub struct Reward {
+  pub guild_id: i64,
+  pub role_id: i64,
+  pub requirement: i32
 }
