@@ -1,6 +1,6 @@
-use std::sync::{atomic::Ordering, Arc};
+use std::sync::{atomic::Ordering, Arc, RwLock};
 
-use lazy_static::lazy_static;
+use lazy_static::{__Deref, lazy_static};
 use rand::seq::SliceRandom;
 use regex::{NoExpand, Regex};
 use twilight_model::{
@@ -8,14 +8,27 @@ use twilight_model::{
   id::{marker::GuildMarker, Id},
 };
 
-use crate::{context::BeaContext, levels, utils, BeaResult};
+use crate::{
+  config::{self, ChatMessage, ReqGptBody, RespGptBody},
+  context::BeaContext,
+  levels, utils, BeaResult,
+};
 
 lazy_static! {
   static ref MEOW_RE: Regex = Regex::new(r"(?i)m+ *e+ *o+ *w+").unwrap();
   static ref DEATHBED_RE: Regex = Regex::new(r"(?i)d+ *e+ *a+ *t+ *h+ *b+ *e+ *d+").unwrap();
+  static ref MENTION_RE: Regex = Regex::new(&format!("<@{}>", config::BOT_ID)).unwrap();
 }
 
-const MEOWS: &[&str] = &["meow", "MEOW", "MEEEEOOWWWWWW", "meow meow"];
+const MEOWS: &[&str] = &[
+  "meow",
+  "MEOW",
+  "MEEEEOOWWWWWW",
+  "meow meow",
+  r"/ᐠ｡ꞈ｡ᐟ\",
+  r" /ᐠ｡ꞈ｡ᐟ✿\",
+  r"—ฅ/ᐠ. ̫ .ᐟ\ฅ —",
+];
 const SONGS: &[&str] = &[
   "Beatopia Cultsong",
   "10:36",
@@ -41,7 +54,14 @@ pub async fn handle_create(ctx: Arc<BeaContext>, msg: MessageCreate) -> BeaResul
 
   if let Some(guild_id) = msg.guild_id {
     levels::handle(Arc::clone(&ctx), &msg, guild_id).await?;
-
+    if msg.mentions.iter().any(|x| x.id == Id::new(config::BOT_ID)) {
+      handle_bot_mention(
+        Arc::clone(&ctx),
+        &msg,
+        MENTION_RE.replace_all(&msg.content, "").to_string(),
+      )
+      .await?;
+    }
     handle_meow(Arc::clone(&ctx), &msg, guild_id).await?;
     maybe_meow(Arc::clone(&ctx), &msg, guild_id).await?;
     maybe_deathbed(Arc::clone(&ctx), &msg, guild_id).await?;
@@ -95,7 +115,7 @@ async fn maybe_deathbed(
                 .nick
                 .unwrap_or(msg.author.clone().name),
             )?
-            .avatar_url(&utils::avatar_url(msg.clone())?)
+            .avatar_url(&utils::avatar_url(msg.0.clone())?)
             .await?;
         } else {
           ctx
@@ -162,5 +182,59 @@ async fn maybe_meow(
     }
     None => {}
   }
+  Ok(())
+}
+
+async fn handle_bot_mention(
+  ctx: Arc<BeaContext>,
+  msg: &MessageCreate,
+  content: String,
+) -> BeaResult<()> {
+  let history = match ctx.state.chatgpt_cache.get(&msg.author.id) {
+    Some(past_msgs) => {
+      past_msgs.write().unwrap().push(ChatMessage::User(content));
+      past_msgs.read().unwrap().deref().clone()
+    }
+    None => {
+      let msgs = RwLock::new(vec![
+        ChatMessage::System(config::PERSONALITY.to_string()),
+        ChatMessage::User(content),
+      ]);
+      let msg_history = msgs.read().unwrap().deref().clone();
+      ctx.state.chatgpt_cache.insert(msg.author.id, msgs);
+      msg_history
+    }
+  };
+
+  ctx.http.create_typing_trigger(msg.channel_id).await?;
+  let res = ctx
+    .req
+    .post("https://api.openai.com/v1/chat/completions")
+    .bearer_auth(std::env::var("OPENAI_KEY").expect("Could not find DISCORD_TOKEN"))
+    .json(&ReqGptBody {
+      model: String::from("gpt-3.5-turbo"),
+      messages: history,
+      temperature: 0.7,
+      max_tokens: 256,
+    })
+    .send()
+    .await?
+    .json::<RespGptBody>()
+    .await?;
+
+  ctx
+    .http
+    .create_message(msg.channel_id)
+    .content(&res.choices[0].message.to_string())?
+    .reply(msg.id)
+    .await?;
+
+  if let Some(past_msgs) = ctx.state.chatgpt_cache.get(&msg.author.id) {
+    past_msgs
+      .write()
+      .unwrap()
+      .push(res.choices[0].message.clone())
+  }
+
   Ok(())
 }

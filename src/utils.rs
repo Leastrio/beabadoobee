@@ -1,9 +1,9 @@
-use twilight_model::gateway::payload::incoming::MessageCreate;
+use twilight_model::channel::Message;
 
 use crate::BeaResult;
 
-pub fn avatar_url(msg: MessageCreate) -> BeaResult<String> {
-  Ok(match &msg.member {
+pub fn avatar_url(msg: Message) -> BeaResult<String> {
+  Ok(match msg.member {
     Some(member) => {
       format!(
         "https://cdn.discordapp.com/guilds/{0}/users/{1}/avatars/{2}.png",

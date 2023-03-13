@@ -1,8 +1,13 @@
-use std::{collections::HashSet, sync::{atomic::AtomicU16, Arc}, time::Duration};
+use std::{
+  collections::HashSet,
+  sync::{atomic::AtomicU16, Arc},
+  time::Duration,
+};
 
 use dashmap::DashMap;
 use rand::Rng;
 use sqlx::PgPool;
+use std::sync::RwLock;
 use twilight_http::Client;
 use twilight_model::id::{
   marker::{GuildMarker, UserMarker},
@@ -15,12 +20,14 @@ pub struct BeaContext {
   pub http: Client,
   pub db: PgPool,
   pub state: BeaState,
+  pub req: reqwest::Client,
 }
 
 pub struct BeaState {
   pub guild_configs: Arc<DashMap<Id<GuildMarker>, config::Guild>>,
   pub meow_counters: Arc<DashMap<Id<GuildMarker>, AtomicU16>>,
   pub level_cooldowns: Arc<DashMap<Id<GuildMarker>, HashSet<Id<UserMarker>>>>,
+  pub chatgpt_cache: Arc<DashMap<Id<UserMarker>, RwLock<Vec<config::ChatMessage>>>>,
 }
 
 impl BeaState {
@@ -35,6 +42,7 @@ impl BeaState {
       level_cooldowns: init_level_cooldowns(db)
         .await
         .expect("Could not populate level cooldown map"),
+      chatgpt_cache: DashMap::new().into(),
     }
   }
 
@@ -56,7 +64,11 @@ impl BeaState {
   }
 
   pub fn set_cooldown(&self, guild_id: Id<GuildMarker>, user_id: Id<UserMarker>) -> BeaResult<()> {
-    self.level_cooldowns.get_mut(&guild_id).unwrap().insert(user_id);
+    self
+      .level_cooldowns
+      .get_mut(&guild_id)
+      .unwrap()
+      .insert(user_id);
 
     let cooldowns = Arc::downgrade(&self.level_cooldowns);
     tokio::spawn(async move {
@@ -85,7 +97,9 @@ async fn init_level_cooldowns(
   Ok(Arc::new(guilds))
 }
 
-async fn init_guild_configs(db: &PgPool) -> BeaResult<Arc<DashMap<Id<GuildMarker>, config::Guild>>> {
+async fn init_guild_configs(
+  db: &PgPool,
+) -> BeaResult<Arc<DashMap<Id<GuildMarker>, config::Guild>>> {
   let guilds = DashMap::new();
   for guild in sqlx::query_as!(config::Guild, "SELECT * FROM guilds")
     .fetch_all(db)

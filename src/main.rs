@@ -4,6 +4,7 @@ mod context;
 mod database;
 mod levels;
 mod message;
+mod starboard;
 mod utils;
 
 use std::{
@@ -14,10 +15,12 @@ use std::{
     Arc,
   },
 };
+
 use tokio::signal::unix::{signal, SignalKind};
 use tracing::{error, info, warn};
 use twilight_gateway::{CloseFrame, Config, Event, Intents, Shard, ShardId};
 use twilight_http::Client;
+use twilight_mention::Mention;
 use twilight_model::{
   gateway::{
     payload::{incoming::MemberAdd, outgoing::update_presence::UpdatePresencePayload},
@@ -37,7 +40,10 @@ static SHUTDOWN: AtomicBool = AtomicBool::new(false);
 async fn main() {
   tracing_subscriber::fmt::init();
 
-  let token = std::env::var("DISCORD_TOKEN").expect("Could not find DISCORD_TOKEN");
+  let token = std::env::var("DISCORD_TOKEN")
+    .expect("Could not find DISCORD_TOKEN")
+    .trim()
+    .to_string();
   let http = Client::new(token.clone());
 
   let current_app = http
@@ -80,8 +86,14 @@ async fn main() {
     .expect("Could not connect to database");
 
   let state = BeaState::new(&db).await;
+  let req = reqwest::Client::new();
 
-  let context = Arc::new(BeaContext { http, db, state });
+  let context = Arc::new(BeaContext {
+    http,
+    db,
+    state,
+    req,
+  });
 
   let mut shard = Shard::with_config(ShardId::ONE, config);
   info!("Shard Created.");
@@ -131,11 +143,15 @@ async fn handle(event: Event, ctx: Arc<BeaContext>) {
     Event::MessageCreate(msg) => message::handle_create(ctx, *msg).await,
     Event::MemberAdd(member_add) => {
       if member_add.guild_id == config::BEACORD_ID {
-        send_welcome(*member_add, ctx).await
+        send_beacord_welcome(*member_add, ctx).await
+      } else if member_add.guild_id == config::PLUTOCORD_ID {
+        send_plutocord_welcome(*member_add, ctx).await
       } else {
         Ok(())
       }
     }
+    Event::ReactionAdd(reaction_add) => starboard::handle_react(ctx, *reaction_add).await,
+    Event::ReactionRemove(reaction_remove) => starboard::handle_remove(ctx, *reaction_remove).await,
     _ => Ok(()),
   };
   match res {
@@ -144,7 +160,7 @@ async fn handle(event: Event, ctx: Arc<BeaContext>) {
   }
 }
 
-async fn send_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<()> {
+async fn send_beacord_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<()> {
   let embed = EmbedBuilder::new()
     .title("˚୨୧⋆｡˚ ⋆welcome to the beacord! ⋆ ˚｡⋆୨୧˚")
     .description("𝗵𝗶! 𝘄𝗲𝗹𝗰𝗼𝗺𝗲 𝘁𝗼 𝘁𝗵𝗲 𝗯𝗲𝗮𝗯𝗮𝗱𝗼𝗼𝗯𝗲𝗲 𝗱𝗶𝘀𝗰𝗼𝗿𝗱!
@@ -154,7 +170,7 @@ async fn send_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<
     We have an ongoing event happening! Check it out in <#925653068958277683>
 
     ***what's your favorite bea song?***")
-    .color(6960383)
+    .color(0x6A34FF)
     .thumbnail(ImageSource::url("https://media.giphy.com/media/KkVPbGYUAZYdvcdv0A/giphy.gif")?)
     .build();
 
@@ -162,9 +178,28 @@ async fn send_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<
     .http
     .create_message(Id::new(config::BEACORD_GEN_ID))
     .content(&format!(
-      "<@&926971203309162546> <@{}>",
-      member_add.user.id.get()
+      "<@&926971203309162546> {}",
+      member_add.user.id.mention()
     ))?
+    .embeds(&[embed])?
+    .await?;
+
+  Ok(())
+}
+
+async fn send_plutocord_welcome(member_add: MemberAdd, ctx: Arc<BeaContext>) -> BeaResult<()> {
+  let embed = EmbedBuilder::new()
+    .title("welcome!")
+    .description(format!(
+      "haii {}, welcome to pluto cord!\nmake sure to get some <#1055345087833456770> :3",
+      member_add.user.id.get()
+    ))
+    .color(0xff7573)
+    .build();
+
+  ctx
+    .http
+    .create_message(Id::new(config::BEACORD_GEN_ID))
     .embeds(&[embed])?
     .await?;
 

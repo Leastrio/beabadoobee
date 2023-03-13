@@ -6,7 +6,7 @@ use twilight_model::{
   id::{marker::GuildMarker, Id},
 };
 
-use crate::{context::BeaContext, BeaResult, config};
+use crate::{config, context::BeaContext, BeaResult};
 
 pub async fn handle(
   ctx: Arc<BeaContext>,
@@ -38,15 +38,39 @@ pub async fn handle(
       if new_level > calc_level(xp - new_xp) {
         match level_channel_id {
           0 => {
-            ctx.http.create_message(msg.channel_id).content(&format!("<@{}> just leveled up to level {}", user, new_level))?.await?;
-          },
+            ctx
+              .http
+              .create_message(msg.channel_id)
+              .content(&format!(
+                "<@{}> just leveled up to level {}",
+                user, new_level
+              ))?
+              .await?;
+          }
           _ => {
-            ctx.http.create_message(Id::new(level_channel_id as u64)).content(&format!("<@{}> just leveled up to level {}", user, new_level))?.await?;
+            ctx
+              .http
+              .create_message(Id::new(level_channel_id as u64))
+              .content(&format!(
+                "<@{}> just leveled up to level {}",
+                user, new_level
+              ))?
+              .await?;
           }
         }
       }
-      if let Some(role) = sqlx::query_as!(config::Reward, "SELECT * FROM role_rewards WHERE guild_id = $1", guild_id.get() as i64).fetch_optional(&ctx.db).await? {
-        ctx.http.add_guild_member_role(guild_id, Id::new(user as u64), Id::new(role.role_id as u64)).await?;
+      if let Some(role) = sqlx::query_as!(
+        config::Reward,
+        "SELECT * FROM role_rewards WHERE guild_id = $1",
+        guild_id.get() as i64
+      )
+      .fetch_optional(&ctx.db)
+      .await?
+      {
+        ctx
+          .http
+          .add_guild_member_role(guild_id, Id::new(user as u64), Id::new(role.role_id as u64))
+          .await?;
       }
     }
   }
